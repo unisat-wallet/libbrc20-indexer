@@ -27,7 +27,6 @@ func NewDecimalCopy(other *Decimal) *Decimal {
 
 // NewDecimalFromString creates a Decimal instance from a string
 func NewDecimalFromString(s string) (*Decimal, int, error) {
-	s = strings.TrimSpace(s)
 	if s == "" {
 		return nil, 0, errors.New("empty string")
 	}
@@ -35,6 +34,11 @@ func NewDecimalFromString(s string) (*Decimal, int, error) {
 	parts := strings.Split(s, ".")
 	if len(parts) > 2 {
 		return nil, 0, fmt.Errorf("invalid decimal format: %s", s)
+	}
+
+	integerPartStr := parts[0]
+	if integerPartStr == "" || integerPartStr[0] == '+' {
+		return nil, 0, errors.New("empty integer")
 	}
 
 	integerPart, ok := new(big.Int).SetString(parts[0], 10)
@@ -46,6 +50,10 @@ func NewDecimalFromString(s string) (*Decimal, int, error) {
 	decimalPart := big.NewInt(0)
 	if len(parts) == 2 {
 		decimalPartStr := parts[1]
+		if decimalPartStr == "" || decimalPartStr[0] == '-' || decimalPartStr[0] == '+' {
+			return nil, 0, errors.New("empty decimal")
+		}
+
 		currPrecision = len(decimalPartStr)
 		if currPrecision > MAX_PRECISION {
 			return nil, 0, fmt.Errorf("decimal exceeds maximum precision: %s", s)
@@ -55,8 +63,8 @@ func NewDecimalFromString(s string) (*Decimal, int, error) {
 			decimalPartStr += "0"
 		}
 		decimalPart, ok = new(big.Int).SetString(decimalPartStr, 10)
-		if !ok {
-			return nil, 0, fmt.Errorf("invalid integer format: %s", parts[0])
+		if !ok || decimalPart.Sign() < 0 {
+			return nil, 0, fmt.Errorf("invalid decimal format: %s", parts[0])
 		}
 	}
 
