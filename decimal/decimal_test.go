@@ -2,7 +2,8 @@ package decimal_test
 
 import (
 	"testing"
-	"unisatquery/lib/brc20/decimal"
+
+	"github.com/unisat-wallet/libbrc20-indexer/decimal"
 )
 
 func TestNewDecimalFromString(t *testing.T) {
@@ -20,8 +21,19 @@ func TestNewDecimalFromString(t *testing.T) {
 		{"", "", true},
 		{" ", "", true},
 		{".", "", true},
+		{" 123.456", "", true},
+		{".456", "", true},
+		{".456 ", "", true},
+		{" .456 ", "", true},
+		{" 456", "", true},
+		{"456 ", "", true},
+		{"45 6", "", true},
+		{"123. 456", "", true},
+		{"123.-456", "", true},
+		{"123.+456", "", true},
+		{"+123.456", "", true},
 		{"123.456.789", "", true},
-		{"123456789.", "123456789", false},
+		{"123456789.", "123456789", true},
 		{"123456789.12345678901234567891", "", true},
 	}
 
