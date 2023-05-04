@@ -174,7 +174,7 @@ func ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) (inscrip
 			}
 			if dec, err := strconv.ParseUint(tinfo.Data.BRC20Decimal, 10, 64); err != nil || dec > 18 {
 				// dec invalid
-				log.Printf("ProcessUpdateLatestBRC20 deploy, but dec invalid. ticker:%s, dec: %s",
+				log.Printf("ProcessUpdateLatestBRC20 deploy, but dec invalid. ticker: %s, dec: %s",
 					uniqueLowerTicker,
 					tinfo.Data.BRC20Decimal,
 				)
@@ -186,7 +186,7 @@ func ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) (inscrip
 			// max
 			if max, precision, err := decimal.NewDecimalFromString(body.BRC20Max); err != nil {
 				// max invalid
-				log.Printf("ProcessUpdateLatestBRC20 deploy, but max invalid. ticker:%s, max: %s",
+				log.Printf("ProcessUpdateLatestBRC20 deploy, but max invalid. ticker: %s, max: '%s'",
 					uniqueLowerTicker,
 					body.BRC20Max,
 				)
@@ -204,7 +204,7 @@ func ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) (inscrip
 			}
 			if lim, precision, err := decimal.NewDecimalFromString(tinfo.Data.BRC20Limit); err != nil {
 				// limit invalid
-				log.Printf("ProcessUpdateLatestBRC20 deploy, but limit invalid. ticker:%s, limit: %s",
+				log.Printf("ProcessUpdateLatestBRC20 deploy, but limit invalid. ticker: %s, limit: '%s'",
 					uniqueLowerTicker,
 					tinfo.Data.BRC20Limit,
 				)
@@ -250,6 +250,10 @@ func ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) (inscrip
 			// check mint amount
 			amt, precision, err := decimal.NewDecimalFromString(body.BRC20Amount)
 			if err != nil {
+				log.Printf("ProcessUpdateLatestBRC20 mint, but amount invalid. ticker: %s, amount: '%s'",
+					uniqueLowerTicker,
+					body.BRC20Amount,
+				)
 				continue
 			}
 			if precision > int(tinfo.Decimal) {
@@ -347,7 +351,7 @@ func ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) (inscrip
 			// check amount
 			amt, precision, err := decimal.NewDecimalFromString(body.BRC20Amount)
 			if err != nil {
-				log.Printf("ProcessUpdateLatestBRC20 inscribe transfer, but amount invalid. ticker:%s, amount: %s",
+				log.Printf("ProcessUpdateLatestBRC20 inscribe transfer, but amount invalid. ticker: %s, amount: '%s'",
 					tokenInfo.Ticker,
 					body.BRC20Amount,
 				)
