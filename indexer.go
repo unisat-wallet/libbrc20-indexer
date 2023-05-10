@@ -138,13 +138,23 @@ func ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) (inscrip
 		}
 
 		// is inscribe deploy/mint/transfer
-		var body model.InscriptionBRC20Content
-		if err := json.Unmarshal(data.ContentBody, &body); err != nil {
+		var bodyMap map[string]string = make(map[string]string, 8)
+		if err := json.Unmarshal(data.ContentBody, &bodyMap); err != nil {
 			log.Printf("ProcessUpdateLatestBRC20 parse json, but failed. txid: %s",
 				hex.EncodeToString(utils.ReverseBytes(data.TxId)),
 			)
 			continue
 		}
+		var body model.InscriptionBRC20Content
+		body.Proto = bodyMap["p"]
+		body.Operation = bodyMap["op"]
+		body.BRC20Tick = bodyMap["tick"]
+		body.BRC20Max = bodyMap["max"]
+		body.BRC20Limit = bodyMap["lim"]
+		body.BRC20Amount = bodyMap["amt"]
+		body.BRC20To = bodyMap["to"]
+		body.BRC20Decimal = bodyMap["dec"]
+
 		if body.Proto != "brc-20" || len(body.BRC20Tick) != 4 {
 			continue
 		}
