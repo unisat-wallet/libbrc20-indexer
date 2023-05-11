@@ -138,7 +138,7 @@ func ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) (inscrip
 		}
 
 		// is inscribe deploy/mint/transfer
-		var bodyMap map[string]string = make(map[string]string, 8)
+		var bodyMap map[string]interface{} = make(map[string]interface{}, 8)
 		if err := json.Unmarshal(data.ContentBody, &bodyMap); err != nil {
 			log.Printf("ProcessUpdateLatestBRC20 parse json, but failed. txid: %s",
 				hex.EncodeToString(utils.ReverseBytes(data.TxId)),
@@ -146,14 +146,30 @@ func ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) (inscrip
 			continue
 		}
 		var body model.InscriptionBRC20Content
-		body.Proto = bodyMap["p"]
-		body.Operation = bodyMap["op"]
-		body.BRC20Tick = bodyMap["tick"]
-		body.BRC20Max = bodyMap["max"]
-		body.BRC20Limit = bodyMap["lim"]
-		body.BRC20Amount = bodyMap["amt"]
-		body.BRC20To = bodyMap["to"]
-		body.BRC20Decimal = bodyMap["dec"]
+		if v, ok := bodyMap["p"].(string); ok {
+			body.Proto = v
+		}
+		if v, ok := bodyMap["op"].(string); ok {
+			body.Operation = v
+		}
+		if v, ok := bodyMap["tick"].(string); ok {
+			body.BRC20Tick = v
+		}
+		if v, ok := bodyMap["max"].(string); ok {
+			body.BRC20Max = v
+		}
+		if v, ok := bodyMap["lim"].(string); ok {
+			body.BRC20Limit = v
+		}
+		if v, ok := bodyMap["amt"].(string); ok {
+			body.BRC20Amount = v
+		}
+		if v, ok := bodyMap["to"].(string); ok {
+			body.BRC20To = v
+		}
+		if v, ok := bodyMap["dec"].(string); ok {
+			body.BRC20Decimal = v
+		}
 
 		if body.Proto != "brc-20" || len(body.BRC20Tick) != 4 {
 			continue
