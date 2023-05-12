@@ -276,10 +276,10 @@ func ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) (inscrip
 			// check mint amount
 			amt, precision, err := decimal.NewDecimalFromString(body.BRC20Amount)
 			if err != nil {
-				log.Printf("ProcessUpdateLatestBRC20 mint, but amount invalid. ticker: %s, amount: '%s'",
-					uniqueLowerTicker,
-					body.BRC20Amount,
-				)
+				// log.Printf("ProcessUpdateLatestBRC20 mint, but amount invalid. ticker: %s, amount: '%s'",
+				// 	uniqueLowerTicker,
+				// 	body.BRC20Amount,
+				// )
 				continue
 			}
 			if precision > int(tinfo.Decimal) {
@@ -377,10 +377,10 @@ func ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) (inscrip
 			// check amount
 			amt, precision, err := decimal.NewDecimalFromString(body.BRC20Amount)
 			if err != nil {
-				log.Printf("ProcessUpdateLatestBRC20 inscribe transfer, but amount invalid. ticker: %s, amount: '%s'",
-					tokenInfo.Ticker,
-					body.BRC20Amount,
-				)
+				// log.Printf("ProcessUpdateLatestBRC20 inscribe transfer, but amount invalid. ticker: %s, amount: '%s'",
+				// 	tokenInfo.Ticker,
+				// 	body.BRC20Amount,
+				// )
 				continue
 			}
 			if precision > int(tinfo.Decimal) {
