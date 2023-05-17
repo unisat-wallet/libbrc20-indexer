@@ -159,8 +159,12 @@ func ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) (inscrip
 		if v, ok := bodyMap["max"].(string); ok {
 			body.BRC20Max = v
 		}
-		if v, ok := bodyMap["lim"].(string); ok {
-			body.BRC20Limit = v
+		if _, ok := bodyMap["lim"]; !ok {
+			body.BRC20Limit = body.BRC20Max
+		} else {
+			if v, ok := bodyMap["lim"].(string); ok {
+				body.BRC20Limit = v
+			}
 		}
 		if v, ok := bodyMap["amt"].(string); ok {
 			body.BRC20Amount = v
@@ -168,8 +172,13 @@ func ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) (inscrip
 		if v, ok := bodyMap["to"].(string); ok {
 			body.BRC20To = v
 		}
-		if v, ok := bodyMap["dec"].(string); ok {
-			body.BRC20Decimal = v
+
+		if _, ok := bodyMap["dec"]; !ok {
+			body.BRC20Decimal = "18"
+		} else {
+			if v, ok := bodyMap["dec"].(string); ok {
+				body.BRC20Decimal = v
+			}
 		}
 
 		if body.Proto != "brc-20" || len(body.BRC20Tick) != 4 {
@@ -196,9 +205,6 @@ func ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) (inscrip
 			tinfo.InscriptionNumberStart = data.InscriptionNumber
 
 			// dec
-			if tinfo.Data.BRC20Decimal == "" {
-				tinfo.Data.BRC20Decimal = "18"
-			}
 			if dec, err := strconv.ParseUint(tinfo.Data.BRC20Decimal, 10, 64); err != nil || dec > 18 {
 				// dec invalid
 				log.Printf("ProcessUpdateLatestBRC20 deploy, but dec invalid. ticker: %s, dec: %s",
@@ -226,9 +232,6 @@ func ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) (inscrip
 			}
 
 			// lim
-			if tinfo.Data.BRC20Limit == "" {
-				tinfo.Data.BRC20Limit = body.BRC20Max
-			}
 			if lim, precision, err := decimal.NewDecimalFromString(tinfo.Data.BRC20Limit); err != nil {
 				// limit invalid
 				log.Printf("ProcessUpdateLatestBRC20 deploy, but limit invalid. ticker: %s, limit: '%s'",
