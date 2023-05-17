@@ -10,11 +10,11 @@ import (
 
 type InscriptionBRC20Data struct {
 	IsTransfer bool
-	TxId       []byte `json:"-"`
+	TxId       string `json:"-"`
 	TxIdx      uint32 `json:"-"`
 
 	Satoshi  uint64 `json:"-"`
-	PkScript []byte `json:"-"`
+	PkScript string `json:"-"`
 
 	InscriptionNumber int64
 	ContentBody       []byte
@@ -69,15 +69,14 @@ type InscriptionBRC20TickInfo struct {
 	MintTimes uint64           `json:"-"`
 	Decimal   uint8            `json:"-"`
 
-	TxId  []byte `json:"-"`
+	TxId  string `json:"-"`
 	TxIdx uint32 `json:"-"`
 
 	Satoshi  uint64 `json:"-"`
-	PkScript []byte `json:"-"`
+	PkScript string `json:"-"`
 
 	InscriptionNumber int64  `json:"inscriptionNumber"`
 	InscriptionId     string `json:"inscriptionId"`
-	ContentBody       []byte `json:"-"`
 	CreateIdxKey      string `json:"-"`
 	Height            uint32 `json:"-"`
 	BlockTime         uint32 `json:"-"`
@@ -97,12 +96,6 @@ func NewInscriptionBRC20TickInfo(body *InscriptionBRC20Content, data *Inscriptio
 			Operation: body.Operation,
 			BRC20Tick: body.BRC20Tick,
 		},
-		Max:                decimal.NewDecimal(),
-		Limit:              decimal.NewDecimal(),
-		TotalMinted:        decimal.NewDecimal(),
-		ConfirmedMinted:    decimal.NewDecimal(),
-		ConfirmedMinted1h:  decimal.NewDecimal(),
-		ConfirmedMinted24h: decimal.NewDecimal(),
 
 		Decimal: 18,
 
@@ -113,7 +106,7 @@ func NewInscriptionBRC20TickInfo(body *InscriptionBRC20Content, data *Inscriptio
 		PkScript: data.PkScript,
 
 		InscriptionNumber: data.InscriptionNumber,
-		InscriptionId:     fmt.Sprintf("%si%d", hex.EncodeToString(utils.ReverseBytes(data.TxId)), data.TxIdx),
+		InscriptionId:     fmt.Sprintf("%si%d", hex.EncodeToString(utils.ReverseBytes([]byte(data.TxId))), data.TxIdx),
 		CreateIdxKey:      data.CreateIdxKey,
 		Height:            data.Height,
 		BlockTime:         data.BlockTime,
@@ -123,7 +116,7 @@ func NewInscriptionBRC20TickInfo(body *InscriptionBRC20Content, data *Inscriptio
 
 type BRC20TokenBalance struct {
 	Ticker              string
-	PkScript            []byte
+	PkScript            string
 	OverallBalanceSafe  *decimal.Decimal
 	OverallBalance      *decimal.Decimal
 	TransferableBalance *decimal.Decimal
@@ -141,11 +134,11 @@ type BRC20History struct {
 	Valid       bool
 	Inscription *InscriptionBRC20TickInfo
 
-	TxId  []byte
+	TxId  string
 	TxIdx uint32
 
-	PkScriptFrom []byte
-	PkScriptTo   []byte
+	PkScriptFrom string
+	PkScriptTo   string
 	Satoshi      uint64
 
 	Amount              string

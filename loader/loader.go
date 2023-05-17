@@ -39,10 +39,11 @@ func LoadBRC20InputData(fname string) ([]*model.InscriptionBRC20Data, error) {
 			return nil, err
 		}
 
-		data.TxId, err = hex.DecodeString(fields[1])
+		txid, err := hex.DecodeString(fields[1])
 		if err != nil {
 			return nil, err
 		}
+		data.TxId = string(txid)
 
 		txIdx, err := strconv.ParseUint(fields[2], 10, 32)
 		if err != nil {
@@ -56,10 +57,11 @@ func LoadBRC20InputData(fname string) ([]*model.InscriptionBRC20Data, error) {
 		}
 		data.Satoshi = uint64(satoshi)
 
-		data.PkScript, err = hex.DecodeString(fields[4])
+		pkScript, err := hex.DecodeString(fields[4])
 		if err != nil {
 			return nil, err
 		}
+		data.PkScript = string(pkScript)
 
 		inscriptionNumber, err := strconv.ParseInt(fields[5], 10, 64)
 		if err != nil {
@@ -152,9 +154,9 @@ func DumpTickerInfoMap(fname string,
 		for _, holder := range allHolders {
 			balanceData := tokenUsersBalanceData[ticker][holder]
 
-			address, err := utils.GetAddressFromScript(balanceData.PkScript, &chaincfg.MainNetParams)
+			address, err := utils.GetAddressFromScript([]byte(balanceData.PkScript), &chaincfg.MainNetParams)
 			if err != nil {
-				address = hex.EncodeToString(balanceData.PkScript)
+				address = hex.EncodeToString([]byte(balanceData.PkScript))
 			}
 			fmt.Fprintf(file, "%s %s history: %d, transfer: %d, balance: %s, tokens: %d\n",
 				info.Ticker,
