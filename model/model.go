@@ -11,7 +11,8 @@ import (
 type InscriptionBRC20Data struct {
 	IsTransfer bool
 	TxId       string `json:"-"`
-	TxIdx      uint32 `json:"-"`
+	Idx        uint32 `json:"-"`
+	Vout       uint32 `json:"-"`
 
 	Satoshi  uint64 `json:"-"`
 	PkScript string `json:"-"`
@@ -20,6 +21,7 @@ type InscriptionBRC20Data struct {
 	ContentBody       []byte
 	CreateIdxKey      string
 	Height            uint32 // Height of NFT show in block onCreate
+	TxIdx             uint64
 	BlockTime         uint32
 }
 
@@ -65,8 +67,9 @@ type InscriptionBRC20TickInfo struct {
 	MintTimes uint64           `json:"-"`
 	Decimal   uint8            `json:"-"`
 
-	TxId  string `json:"-"`
-	TxIdx uint32 `json:"-"`
+	TxId string `json:"-"`
+	Idx  uint32 `json:"-"`
+	Vout uint32 `json:"-"`
 
 	Satoshi  uint64 `json:"-"`
 	PkScript string `json:"-"`
@@ -75,6 +78,7 @@ type InscriptionBRC20TickInfo struct {
 	InscriptionId     string `json:"inscriptionId"`
 	CreateIdxKey      string `json:"-"`
 	Height            uint32 `json:"-"`
+	TxIdx             uint64 `json:"-"`
 	BlockTime         uint32 `json:"-"`
 
 	Confirmations int `json:"confirmations"`
@@ -95,8 +99,9 @@ func NewInscriptionBRC20TickInfo(body *InscriptionBRC20Content, data *Inscriptio
 
 		Decimal: 18,
 
-		TxId:  data.TxId,
-		TxIdx: data.TxIdx,
+		TxId: data.TxId,
+		Idx:  data.Idx,
+		Vout: data.Vout,
 
 		Satoshi:  data.Satoshi,
 		PkScript: data.PkScript,
@@ -105,6 +110,7 @@ func NewInscriptionBRC20TickInfo(body *InscriptionBRC20Content, data *Inscriptio
 		InscriptionId:     fmt.Sprintf("%si%d", hex.EncodeToString(utils.ReverseBytes([]byte(data.TxId))), data.TxIdx),
 		CreateIdxKey:      data.CreateIdxKey,
 		Height:            data.Height,
+		TxIdx:             data.TxIdx,
 		BlockTime:         data.BlockTime,
 	}
 	return info
@@ -127,8 +133,9 @@ type BRC20History struct {
 	Valid       bool
 	Inscription *InscriptionBRC20TickInfo
 
-	TxId  string
-	TxIdx uint32
+	TxId string
+	Idx  uint32
+	Vout uint32
 
 	PkScriptFrom string
 	PkScriptTo   string
@@ -140,6 +147,7 @@ type BRC20History struct {
 	AvailableBalance    string
 
 	Height    uint32
+	TxIdx     uint64
 	BlockTime uint32
 }
 
@@ -152,16 +160,19 @@ func NewBRC20History(historyType string, isValid bool, isTransfer bool,
 		Amount:      info.Amount.String(),
 		Height:      data.Height,
 		BlockTime:   data.BlockTime,
+		TxIdx:     data.TxIdx,
 	}
 	if isTransfer {
 		history.TxId = data.TxId
-		history.TxIdx = data.TxIdx
+		history.Vout = data.Vout
+		history.Idx = data.Idx
 		history.PkScriptFrom = info.PkScript
 		history.PkScriptTo = data.PkScript
 		history.Satoshi = data.Satoshi
 	} else {
 		history.TxId = info.TxId
-		history.TxIdx = info.TxIdx
+		history.Vout = info.Vout
+		history.Idx = info.Idx
 		history.PkScriptTo = info.PkScript
 		history.Satoshi = info.Satoshi
 	}

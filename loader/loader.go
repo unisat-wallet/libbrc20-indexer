@@ -29,7 +29,7 @@ func LoadBRC20InputData(fname string) ([]*model.InscriptionBRC20Data, error) {
 		line := scanner.Text()
 		fields := strings.Split(line, " ")
 
-		if len(fields) != 10 {
+		if len(fields) != 12 {
 			return nil, fmt.Errorf("invalid data format")
 		}
 
@@ -45,49 +45,61 @@ func LoadBRC20InputData(fname string) ([]*model.InscriptionBRC20Data, error) {
 		}
 		data.TxId = string(txid)
 
-		txIdx, err := strconv.ParseUint(fields[2], 10, 32)
+		idx, err := strconv.ParseUint(fields[2], 10, 32)
 		if err != nil {
 			return nil, err
 		}
-		data.TxIdx = uint32(txIdx)
+		data.Idx = uint32(idx)
 
-		satoshi, err := strconv.ParseUint(fields[3], 10, 64)
+		vout, err := strconv.ParseUint(fields[3], 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		data.Vout = uint32(vout)
+
+		satoshi, err := strconv.ParseUint(fields[4], 10, 64)
 		if err != nil {
 			return nil, err
 		}
 		data.Satoshi = uint64(satoshi)
 
-		pkScript, err := hex.DecodeString(fields[4])
+		pkScript, err := hex.DecodeString(fields[5])
 		if err != nil {
 			return nil, err
 		}
 		data.PkScript = string(pkScript)
 
-		inscriptionNumber, err := strconv.ParseInt(fields[5], 10, 64)
+		inscriptionNumber, err := strconv.ParseInt(fields[6], 10, 64)
 		if err != nil {
 			return nil, err
 		}
 		data.InscriptionNumber = int64(inscriptionNumber)
 
-		data.ContentBody, err = hex.DecodeString(fields[6])
+		data.ContentBody, err = hex.DecodeString(fields[7])
 		if err != nil {
 			return nil, err
 		}
 
-		createIdxKey, err := hex.DecodeString(fields[7])
+		createIdxKey, err := hex.DecodeString(fields[8])
 		if err != nil {
 			return nil, err
 		}
 
 		data.CreateIdxKey = string(createIdxKey)
 
-		height, err := strconv.ParseUint(fields[8], 10, 32)
+		height, err := strconv.ParseUint(fields[9], 10, 32)
 		if err != nil {
 			return nil, err
 		}
 		data.Height = uint32(height)
 
-		blockTime, err := strconv.ParseUint(fields[9], 10, 32)
+		txIdx, err := strconv.ParseUint(fields[10], 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		data.TxIdx = txIdx
+
+		blockTime, err := strconv.ParseUint(fields[11], 10, 32)
 		if err != nil {
 			return nil, err
 		}
