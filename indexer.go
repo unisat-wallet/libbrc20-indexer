@@ -17,7 +17,7 @@ import (
 func ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) (inscriptionsTickerInfoMap map[string]*model.BRC20TokenInfo,
 	userTokensBalanceData map[string]map[string]*model.BRC20TokenBalance,
 	tokenUsersBalanceData map[string]map[string]*model.BRC20TokenBalance,
-	inscriptionsValidTransferDataMap map[string]model.InscriptionBRC20InfoResp,
+	inscriptionsValidBRC20DataMap map[string]model.InscriptionBRC20InfoResp,
 ) {
 
 	log.Printf("ProcessUpdateLatestBRC20 update. total %d", len(brc20Datas))
@@ -25,7 +25,7 @@ func ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) (inscrip
 	inscriptionsTickerInfoMap = make(map[string]*model.BRC20TokenInfo, 0)
 	userTokensBalanceData = make(map[string]map[string]*model.BRC20TokenBalance, 0)
 	tokenUsersBalanceData = make(map[string]map[string]*model.BRC20TokenBalance, 0)
-	inscriptionsValidTransferDataMap = make(map[string]model.InscriptionBRC20InfoResp, 0)
+	inscriptionsValidBRC20DataMap = make(map[string]model.InscriptionBRC20InfoResp, 0)
 
 	inscriptionsValidTransferMap := make(map[string]*model.InscriptionBRC20TickInfo, 0)
 	inscriptionsInvalidTransferMap := make(map[string]*model.InscriptionBRC20TickInfo, 0)
@@ -270,6 +270,8 @@ func ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) (inscrip
 			tokenUsers[string(data.PkScript)] = tokenBalance
 			tokenUsersBalanceData[uniqueLowerTicker] = tokenUsers
 
+			inscriptionsValidBRC20DataMap[data.CreateIdxKey] = tinfo.Data
+
 		} else if body.Operation == constant.BRC20_OP_MINT {
 			tokenInfo, ok := inscriptionsTickerInfoMap[uniqueLowerTicker]
 			if !ok {
@@ -372,6 +374,8 @@ func ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) (inscrip
 			tokenBalance.History = append(tokenBalance.History, history)
 			tokenInfo.History = append(tokenInfo.History, history)
 
+			inscriptionsValidBRC20DataMap[data.CreateIdxKey] = mintInfo.Data
+
 		} else if body.Operation == constant.BRC20_OP_TRANSFER {
 			tokenInfo, ok := inscriptionsTickerInfoMap[uniqueLowerTicker]
 			if !ok {
@@ -451,7 +455,7 @@ func ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) (inscrip
 				}
 				tokenBalance.ValidTransferMap[data.CreateIdxKey] = transferInfo
 				inscriptionsValidTransferMap[data.CreateIdxKey] = transferInfo
-				inscriptionsValidTransferDataMap[data.CreateIdxKey] = transferInfo.Data
+				inscriptionsValidBRC20DataMap[data.CreateIdxKey] = transferInfo.Data
 			}
 
 		} else {
@@ -468,14 +472,15 @@ func ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) (inscrip
 		}
 	}
 
-	log.Printf("ProcessUpdateLatestBRC20 finish. ticker: %d, users: %d, tokens: %d, validTransfer: %d, invalidTransfer: %d",
+	log.Printf("ProcessUpdateLatestBRC20 finish. ticker: %d, users: %d, tokens: %d, validInscription: %d, validTransfer: %d, invalidTransfer: %d",
 		len(inscriptionsTickerInfoMap),
 		len(userTokensBalanceData),
 		len(tokenUsersBalanceData),
 
+		len(inscriptionsValidBRC20DataMap),
 		len(inscriptionsValidTransferMap),
 		len(inscriptionsInvalidTransferMap),
 	)
 
-	return inscriptionsTickerInfoMap, userTokensBalanceData, tokenUsersBalanceData, inscriptionsValidTransferDataMap
+	return inscriptionsTickerInfoMap, userTokensBalanceData, tokenUsersBalanceData, inscriptionsValidBRC20DataMap
 }
