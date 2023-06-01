@@ -49,8 +49,15 @@ type InscriptionBRC20Content struct {
 type BRC20TokenInfo struct {
 	Ticker  string
 	Deploy  *InscriptionBRC20TickInfo
+	History []BRC20History
+}
 
-	History []*BRC20History
+type InscriptionBRC20TickInfoResp struct {
+	Height            uint32                   `json:"-"`
+	Data              InscriptionBRC20InfoResp `json:"data"`
+	InscriptionNumber int64                    `json:"inscriptionNumber"`
+	InscriptionId     string                   `json:"inscriptionId"`
+	Confirmations     int                      `json:"confirmations"`
 }
 
 type InscriptionBRC20TickInfo struct {
@@ -75,13 +82,10 @@ type InscriptionBRC20TickInfo struct {
 	PkScript string `json:"-"`
 
 	InscriptionNumber int64  `json:"inscriptionNumber"`
-	InscriptionId     string `json:"inscriptionId"`
 	CreateIdxKey      string `json:"-"`
 	Height            uint32 `json:"-"`
 	TxIdx             uint64 `json:"-"`
 	BlockTime         uint32 `json:"-"`
-
-	Confirmations int `json:"confirmations"`
 
 	CompleteHeight    uint32 `json:"-"`
 	CompleteBlockTime uint32 `json:"-"`
@@ -96,7 +100,6 @@ func NewInscriptionBRC20TickInfo(body *InscriptionBRC20Content, data *Inscriptio
 			Operation: body.Operation,
 			BRC20Tick: body.BRC20Tick,
 		},
-
 		Decimal: 18,
 
 		TxId: data.TxId,
@@ -107,7 +110,6 @@ func NewInscriptionBRC20TickInfo(body *InscriptionBRC20Content, data *Inscriptio
 		PkScript: data.PkScript,
 
 		InscriptionNumber: data.InscriptionNumber,
-		InscriptionId:     fmt.Sprintf("%si%d", hex.EncodeToString(utils.ReverseBytes([]byte(data.TxId))), data.TxIdx),
 		CreateIdxKey:      data.CreateIdxKey,
 		Height:            data.Height,
 		TxIdx:             data.TxIdx,
@@ -126,12 +128,12 @@ type BRC20TokenBalance struct {
 	ValidTransferMap    map[string]*InscriptionBRC20TickInfo
 	Deploy              *InscriptionBRC20TickInfo
 
-	History []*BRC20History
+	History []BRC20History
 }
 type BRC20History struct {
 	Type        string // inscribe-deploy/inscribe-mint/inscribe-transfer/transfer/send/receive
 	Valid       bool
-	Inscription *InscriptionBRC20TickInfo
+	Inscription InscriptionBRC20TickInfoResp
 
 	TxId string
 	Idx  uint32
@@ -152,15 +154,20 @@ type BRC20History struct {
 }
 
 func NewBRC20History(historyType string, isValid bool, isTransfer bool,
-	info *InscriptionBRC20TickInfo, bal *BRC20TokenBalance, data *InscriptionBRC20Data) *BRC20History {
-	history := &BRC20History{
-		Type:        historyType,
-		Valid:       isValid,
-		Inscription: info,
-		Amount:      info.Amount.String(),
-		Height:      data.Height,
-		BlockTime:   data.BlockTime,
+	info *InscriptionBRC20TickInfo, bal *BRC20TokenBalance, data *InscriptionBRC20Data) BRC20History {
+	history := BRC20History{
+		Type:  historyType,
+		Valid: isValid,
+		Inscription: InscriptionBRC20TickInfoResp{
+			Height:            data.Height,
+			Data:              info.Data,
+			InscriptionNumber: info.InscriptionNumber,
+			InscriptionId:     fmt.Sprintf("%si%d", hex.EncodeToString(utils.ReverseBytes([]byte(data.TxId))), data.Idx),
+		},
+		Amount:    info.Amount.String(),
+		Height:    data.Height,
 		TxIdx:     data.TxIdx,
+		BlockTime: data.BlockTime,
 	}
 	if isTransfer {
 		history.TxId = data.TxId
