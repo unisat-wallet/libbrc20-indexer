@@ -41,16 +41,12 @@ type InscriptionBRC20Content struct {
 	BRC20Max     string `json:"max,omitempty"`
 	BRC20Limit   string `json:"lim,omitempty"`
 	BRC20Amount  string `json:"amt,omitempty"`
-	BRC20To      string `json:"to,omitempty"`
 	BRC20Decimal string `json:"dec,omitempty"`
 }
 
 type BRC20TokenInfo struct {
-	Ticker      string
-	Deploy      *InscriptionBRC20TickInfo
-	Mints       []*InscriptionBRC20TickInfo
-	InTransfer  []*InscriptionBRC20TickInfo
-	OutTransfer []*InscriptionBRC20TickInfo
+	Ticker  string
+	Deploy  *InscriptionBRC20TickInfo
 
 	History []*BRC20History
 }
@@ -123,9 +119,6 @@ type BRC20TokenBalance struct {
 	InvalidTransferList []*InscriptionBRC20TickInfo
 	ValidTransferMap    map[string]*InscriptionBRC20TickInfo
 	Deploy              *InscriptionBRC20TickInfo
-	Mints               []*InscriptionBRC20TickInfo
-	InTransfer          []*InscriptionBRC20TickInfo
-	OutTransfer         []*InscriptionBRC20TickInfo
 
 	History []*BRC20History
 }

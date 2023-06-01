@@ -118,7 +118,6 @@ func ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) (inscrip
 			fromTokenBalance.OverallBalance = fromTokenBalance.OverallBalance.Sub(validTransferInfo.Amount)
 			fromTokenBalance.TransferableBalance = fromTokenBalance.TransferableBalance.Sub(validTransferInfo.Amount)
 			delete(fromTokenBalance.ValidTransferMap, data.CreateIdxKey)
-			fromTokenBalance.OutTransfer = append(fromTokenBalance.OutTransfer, validTransferInfo)
 
 			fromHistory := model.NewBRC20History(constant.BRC20_HISTORY_TYPE_SEND, true, true, validTransferInfo, fromTokenBalance, data)
 			fromTokenBalance.History = append(fromTokenBalance.History, fromHistory)
@@ -131,8 +130,6 @@ func ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) (inscrip
 
 			toHistory := model.NewBRC20History(constant.BRC20_HISTORY_TYPE_RECEIVE, true, true, validTransferInfo, tokenBalance, data)
 			tokenBalance.History = append(tokenBalance.History, toHistory)
-
-			tokenBalance.InTransfer = append([]*model.InscriptionBRC20TickInfo{validTransferInfo}, tokenBalance.InTransfer...)
 
 			continue
 		}
@@ -159,18 +156,16 @@ func ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) (inscrip
 		if v, ok := bodyMap["max"].(string); ok {
 			body.BRC20Max = v
 		}
+		if v, ok := bodyMap["amt"].(string); ok {
+			body.BRC20Amount = v
+		}
+
 		if _, ok := bodyMap["lim"]; !ok {
 			body.BRC20Limit = body.BRC20Max
 		} else {
 			if v, ok := bodyMap["lim"].(string); ok {
 				body.BRC20Limit = v
 			}
-		}
-		if v, ok := bodyMap["amt"].(string); ok {
-			body.BRC20Amount = v
-		}
-		if v, ok := bodyMap["to"].(string); ok {
-			body.BRC20To = v
 		}
 
 		if _, ok := bodyMap["dec"]; !ok {
@@ -282,10 +277,6 @@ func ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) (inscrip
 			// check mint amount
 			amt, precision, err := decimal.NewDecimalFromString(body.BRC20Amount)
 			if err != nil {
-				// log.Printf("ProcessUpdateLatestBRC20 mint, but amount invalid. ticker: %s, amount: '%s'",
-				// 	uniqueLowerTicker,
-				// 	body.BRC20Amount,
-				// )
 				continue
 			}
 			if precision > int(tinfo.Decimal) {
@@ -367,7 +358,6 @@ func ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) (inscrip
 				tokenBalance.OverallBalanceSafe = tokenBalance.OverallBalanceSafe.Add(balanceMinted)
 			}
 			tokenBalance.OverallBalance = tokenBalance.OverallBalance.Add(balanceMinted)
-			tokenBalance.Mints = append([]*model.InscriptionBRC20TickInfo{mintInfo}, tokenBalance.Mints...)
 
 			// history
 			history := model.NewBRC20History(constant.BRC20_HISTORY_TYPE_INSCRIBE_MINT, true, false, mintInfo, tokenBalance, data)
@@ -385,10 +375,6 @@ func ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) (inscrip
 			// check amount
 			amt, precision, err := decimal.NewDecimalFromString(body.BRC20Amount)
 			if err != nil {
-				// log.Printf("ProcessUpdateLatestBRC20 inscribe transfer, but amount invalid. ticker: %s, amount: '%s'",
-				// 	tokenInfo.Ticker,
-				// 	body.BRC20Amount,
-				// )
 				continue
 			}
 			if precision > int(tinfo.Decimal) {
