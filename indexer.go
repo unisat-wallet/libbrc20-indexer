@@ -40,8 +40,12 @@ func ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) (inscrip
 				validTransferInfo, ok = inscriptionsInvalidTransferMap[data.CreateIdxKey]
 				if !ok {
 					continue
+				} else {
+					delete(inscriptionsInvalidTransferMap, data.CreateIdxKey)
 				}
 				isInvalid = true
+			} else {
+				delete(inscriptionsValidTransferMap, data.CreateIdxKey)
 			}
 			// ticker
 			uniqueLowerTicker := strings.ToLower(validTransferInfo.Data.BRC20Tick)
