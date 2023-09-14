@@ -46,8 +46,9 @@ type InscriptionBRC20Content struct {
 }
 
 type BRC20TokenInfo struct {
-	Ticker  string
-	Deploy  *InscriptionBRC20TickInfo
+	Ticker string
+	Deploy *InscriptionBRC20TickInfo
+
 	History                 []*BRC20History
 	HistoryMint             []*BRC20History
 	HistoryInscribeTransfer []*BRC20History
