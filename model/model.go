@@ -21,7 +21,7 @@ type InscriptionBRC20Data struct {
 	ContentBody       []byte
 	CreateIdxKey      string
 	Height            uint32 // Height of NFT show in block onCreate
-	TxIdx             uint64
+	TxIdx             uint32
 	BlockTime         uint32
 }
 
@@ -87,7 +87,7 @@ type InscriptionBRC20TickInfo struct {
 	InscriptionNumber int64  `json:"inscriptionNumber"`
 	CreateIdxKey      string `json:"-"`
 	Height            uint32 `json:"-"`
-	TxIdx             uint64 `json:"-"`
+	TxIdx             uint32 `json:"-"`
 	BlockTime         uint32 `json:"-"`
 
 	CompleteHeight    uint32 `json:"-"`
@@ -155,7 +155,7 @@ type BRC20History struct {
 	AvailableBalance    string
 
 	Height    uint32
-	TxIdx     uint64
+	TxIdx     uint32
 	BlockTime uint32
 }
 

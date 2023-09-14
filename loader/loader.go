@@ -96,11 +96,11 @@ func LoadBRC20InputData(fname string) ([]*model.InscriptionBRC20Data, error) {
 		}
 		data.Height = uint32(height)
 
-		txIdx, err := strconv.ParseUint(fields[10], 10, 64)
+		txIdx, err := strconv.ParseUint(fields[10], 10, 32)
 		if err != nil {
 			return nil, err
 		}
-		data.TxIdx = txIdx
+		data.TxIdx = uint32(txIdx)
 
 		blockTime, err := strconv.ParseUint(fields[11], 10, 32)
 		if err != nil {
