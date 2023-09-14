@@ -49,7 +49,10 @@ type InscriptionBRC20Content struct {
 type BRC20TokenInfo struct {
 	Ticker  string
 	Deploy  *InscriptionBRC20TickInfo
-	History []BRC20History
+	History                 []*BRC20History
+	HistoryMint             []*BRC20History
+	HistoryInscribeTransfer []*BRC20History
+	HistoryTransfer         []*BRC20History
 }
 
 type InscriptionBRC20TickInfoResp struct {
@@ -128,10 +131,14 @@ type BRC20TokenBalance struct {
 	ValidTransferMap    map[string]*InscriptionBRC20TickInfo
 	Deploy              *InscriptionBRC20TickInfo
 
-	History []BRC20History
+	History                 []*BRC20History
+	HistoryMint             []*BRC20History
+	HistoryInscribeTransfer []*BRC20History
+	HistorySend             []*BRC20History
+	HistoryReceive          []*BRC20History
 }
 type BRC20History struct {
-	Type        string // inscribe-deploy/inscribe-mint/inscribe-transfer/transfer/send/receive
+	Type        uint8 // inscribe-deploy/inscribe-mint/inscribe-transfer/transfer/send/receive
 	Valid       bool
 	Inscription InscriptionBRC20TickInfoResp
 
@@ -153,9 +160,9 @@ type BRC20History struct {
 	BlockTime uint32
 }
 
-func NewBRC20History(historyType string, isValid bool, isTransfer bool,
-	info *InscriptionBRC20TickInfo, bal *BRC20TokenBalance, data *InscriptionBRC20Data) BRC20History {
-	history := BRC20History{
+func NewBRC20History(historyType uint8, isValid bool, isTransfer bool,
+	info *InscriptionBRC20TickInfo, bal *BRC20TokenBalance, data *InscriptionBRC20Data) *BRC20History {
+	history := &BRC20History{
 		Type:  historyType,
 		Valid: isValid,
 		Inscription: InscriptionBRC20TickInfoResp{
