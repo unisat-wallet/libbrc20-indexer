@@ -73,7 +73,7 @@ type InscriptionBRC20TickInfo struct {
 	ConfirmedMinted24h *decimal.Decimal `json:"-"`
 
 	Amount    *decimal.Decimal `json:"-"`
-	MintTimes uint64           `json:"-"`
+	MintTimes uint32           `json:"-"`
 	Decimal   uint8            `json:"-"`
 
 	TxId string `json:"-"`
