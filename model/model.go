@@ -31,7 +31,6 @@ type InscriptionBRC20InfoResp struct {
 	BRC20Max     string `json:"max,omitempty"`
 	BRC20Limit   string `json:"lim,omitempty"`
 	BRC20Amount  string `json:"amt,omitempty"`
-	BRC20To      string `json:"to,omitempty"`
 	BRC20Decimal string `json:"decimal,omitempty"`
 	BRC20Minted  string `json:"minted,omitempty"`
 }
