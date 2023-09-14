@@ -248,7 +248,7 @@ func ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) (inscrip
 			tokenInfo := &model.BRC20TokenInfo{Ticker: body.BRC20Tick, Deploy: tinfo}
 			inscriptionsTickerInfoMap[uniqueLowerTicker] = tokenInfo
 
-			tokenBalance := &model.BRC20TokenBalance{Ticker: body.BRC20Tick, Deploy: tinfo, PkScript: data.PkScript}
+			tokenBalance := &model.BRC20TokenBalance{Ticker: body.BRC20Tick, PkScript: data.PkScript}
 
 			history := model.NewBRC20History(constant.BRC20_HISTORY_TYPE_N_INSCRIBE_DEPLOY, true, false, tinfo, nil, data)
 			tokenBalance.History = append(tokenBalance.History, history)

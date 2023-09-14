@@ -129,7 +129,6 @@ type BRC20TokenBalance struct {
 	TransferableBalance *decimal.Decimal
 	InvalidTransferList []*InscriptionBRC20TickInfo
 	ValidTransferMap    map[string]*InscriptionBRC20TickInfo
-	Deploy              *InscriptionBRC20TickInfo
 
 	History                 []*BRC20History
 	HistoryMint             []*BRC20History
