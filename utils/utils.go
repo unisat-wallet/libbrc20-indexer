@@ -1,11 +1,15 @@
 package utils
 
 import (
+	"encoding/hex"
 	"fmt"
-
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/txscript"
 )
+
+func GetReversedStringHex(data string) (result string) {
+	return hex.EncodeToString(ReverseBytes([]byte(data)))
+}
 
 func ReverseBytes(data []byte) (result []byte) {
 	for _, b := range data {

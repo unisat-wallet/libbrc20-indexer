@@ -1,7 +1,6 @@
 package brc20
 
 import (
-	"encoding/hex"
 	"encoding/json"
 	"log"
 	"strconv"
@@ -52,7 +51,7 @@ func ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) (inscrip
 			tokenInfo, ok := inscriptionsTickerInfoMap[uniqueLowerTicker]
 			if !ok {
 				log.Printf("ProcessUpdateLatestBRC20 send transfer, but ticker invalid. txid: %s",
-					hex.EncodeToString(utils.ReverseBytes([]byte(data.TxId))),
+					utils.GetReversedStringHex(data.TxId),
 				)
 				continue
 			}
@@ -146,7 +145,7 @@ func ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) (inscrip
 		var bodyMap map[string]interface{} = make(map[string]interface{}, 8)
 		if err := json.Unmarshal([]byte(data.ContentBody), &bodyMap); err != nil {
 			log.Printf("ProcessUpdateLatestBRC20 parse json, but failed. txid: %s",
-				hex.EncodeToString(utils.ReverseBytes([]byte(data.TxId))),
+				utils.GetReversedStringHex(data.TxId),
 			)
 			continue
 		}
