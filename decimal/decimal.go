@@ -22,6 +22,9 @@ func NewDecimal() *Decimal {
 }
 
 func NewDecimalCopy(other *Decimal) *Decimal {
+	if other == nil {
+		return nil
+	}
 	return &Decimal{Value: new(big.Int).Set(other.Value)}
 }
 
