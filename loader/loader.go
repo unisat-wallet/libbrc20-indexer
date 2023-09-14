@@ -24,6 +24,9 @@ func LoadBRC20InputData(fname string) ([]*model.InscriptionBRC20Data, error) {
 
 	var brc20Datas []*model.InscriptionBRC20Data
 	scanner := bufio.NewScanner(file)
+	max := 4 * 1024 * 1024
+	buf := make([]byte, max)
+	scanner.Buffer(buf, max)
 
 	for scanner.Scan() {
 		line := scanner.Text()
