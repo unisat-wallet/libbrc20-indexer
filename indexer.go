@@ -18,8 +18,8 @@ func ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) (inscrip
 	tokenUsersBalanceData map[string]map[string]*model.BRC20TokenBalance,
 	inscriptionsValidBRC20DataMap map[string]model.InscriptionBRC20InfoResp,
 ) {
-
-	log.Printf("ProcessUpdateLatestBRC20 update. total %d", len(brc20Datas))
+	totalDataCount := len(brc20Datas)
+	log.Printf("ProcessUpdateLatestBRC20 update. total %d", totalDataCount)
 
 	inscriptionsTickerInfoMap = make(map[string]*model.BRC20TokenInfo, 0)
 	userTokensBalanceData = make(map[string]map[string]*model.BRC20TokenBalance, 0)
@@ -29,7 +29,7 @@ func ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) (inscrip
 	inscriptionsValidTransferMap := make(map[string]*model.InscriptionBRC20TickInfo, 0)
 	inscriptionsInvalidTransferMap := make(map[string]*model.InscriptionBRC20TickInfo, 0)
 
-	for _, data := range brc20Datas {
+	for idx, data := range brc20Datas {
 		// is sending transfer
 		if data.IsTransfer {
 
@@ -50,7 +50,8 @@ func ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) (inscrip
 			uniqueLowerTicker := strings.ToLower(validTransferInfo.Data.BRC20Tick)
 			tokenInfo, ok := inscriptionsTickerInfoMap[uniqueLowerTicker]
 			if !ok {
-				log.Printf("ProcessUpdateLatestBRC20 send transfer, but ticker invalid. txid: %s",
+				log.Printf("ProcessUpdateLatestBRC20 (%d %%) send transfer, but ticker invalid. txid: %s",
+					idx*100/totalDataCount,
 					utils.GetReversedStringHex(data.TxId),
 				)
 				continue
@@ -65,7 +66,8 @@ func ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) (inscrip
 			// get user's tokens to update
 			fromUserTokens, ok := userTokensBalanceData[string(validTransferInfo.PkScript)]
 			if !ok {
-				log.Printf("ProcessUpdateLatestBRC20 send from user missing. height: %d, txidx: %d",
+				log.Printf("ProcessUpdateLatestBRC20 (%d %%) send from user missing. height: %d, txidx: %d",
+					idx*100/totalDataCount,
 					data.Height,
 					data.TxIdx,
 				)
@@ -74,7 +76,8 @@ func ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) (inscrip
 			// get tokenBalance to update
 			fromTokenBalance, ok := fromUserTokens[uniqueLowerTicker]
 			if !ok {
-				log.Printf("ProcessUpdateLatestBRC20 send from ticker missing. height: %d, txidx: %d",
+				log.Printf("ProcessUpdateLatestBRC20 (%d %%) send from ticker missing. height: %d, txidx: %d",
+					idx*100/totalDataCount,
 					data.Height,
 					data.TxIdx,
 				)
@@ -89,7 +92,8 @@ func ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) (inscrip
 			}
 
 			if _, ok := fromTokenBalance.ValidTransferMap[data.CreateIdxKey]; !ok {
-				log.Printf("ProcessUpdateLatestBRC20 send from transfer missing(dup transfer?). height: %d, txidx: %d",
+				log.Printf("ProcessUpdateLatestBRC20 (%d %%) send from transfer missing(dup transfer?). height: %d, txidx: %d",
+					idx*100/totalDataCount,
 					data.Height,
 					data.TxIdx,
 				)
@@ -144,7 +148,8 @@ func ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) (inscrip
 		// is inscribe deploy/mint/transfer
 		var bodyMap map[string]interface{} = make(map[string]interface{}, 8)
 		if err := json.Unmarshal([]byte(data.ContentBody), &bodyMap); err != nil {
-			log.Printf("ProcessUpdateLatestBRC20 parse json, but failed. txid: %s",
+			log.Printf("ProcessUpdateLatestBRC20 (%d %%) parse json, but failed. txid: %s",
+				idx*100/totalDataCount,
 				utils.GetReversedStringHex(data.TxId),
 			)
 			continue
@@ -193,7 +198,8 @@ func ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) (inscrip
 				continue
 			}
 			if body.BRC20Max == "" { // without max
-				log.Printf("ProcessUpdateLatestBRC20 deploy, but max missing. ticker: %s",
+				log.Printf("ProcessUpdateLatestBRC20 (%d %%) deploy, but max missing. ticker: %s",
+					idx*100/totalDataCount,
 					uniqueLowerTicker,
 				)
 				continue
@@ -209,7 +215,8 @@ func ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) (inscrip
 			// dec
 			if dec, err := strconv.ParseUint(tinfo.Data.BRC20Decimal, 10, 64); err != nil || dec > 18 {
 				// dec invalid
-				log.Printf("ProcessUpdateLatestBRC20 deploy, but dec invalid. ticker: %s, dec: %s",
+				log.Printf("ProcessUpdateLatestBRC20 (%d %%) deploy, but dec invalid. ticker: %s, dec: %s",
+					idx*100/totalDataCount,
 					uniqueLowerTicker,
 					tinfo.Data.BRC20Decimal,
 				)
@@ -221,7 +228,8 @@ func ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) (inscrip
 			// max
 			if max, precision, err := decimal.NewDecimalFromString(body.BRC20Max); err != nil {
 				// max invalid
-				log.Printf("ProcessUpdateLatestBRC20 deploy, but max invalid. ticker: %s, max: '%s'",
+				log.Printf("ProcessUpdateLatestBRC20 (%d %%) deploy, but max invalid. ticker: %s, max: '%s'",
+					idx*100/totalDataCount,
 					uniqueLowerTicker,
 					body.BRC20Max,
 				)
@@ -236,7 +244,8 @@ func ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) (inscrip
 			// lim
 			if lim, precision, err := decimal.NewDecimalFromString(tinfo.Data.BRC20Limit); err != nil {
 				// limit invalid
-				log.Printf("ProcessUpdateLatestBRC20 deploy, but limit invalid. ticker: %s, limit: '%s'",
+				log.Printf("ProcessUpdateLatestBRC20 (%d %%) deploy, but limit invalid. ticker: %s, limit: '%s'",
+					idx*100/totalDataCount,
 					uniqueLowerTicker,
 					tinfo.Data.BRC20Limit,
 				)
