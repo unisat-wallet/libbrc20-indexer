@@ -78,10 +78,11 @@ func LoadBRC20InputData(fname string) ([]*model.InscriptionBRC20Data, error) {
 		}
 		data.InscriptionNumber = int64(inscriptionNumber)
 
-		data.ContentBody, err = hex.DecodeString(fields[7])
+		content, err := hex.DecodeString(fields[7])
 		if err != nil {
 			return nil, err
 		}
+      data.ContentBody = string(content)
 
 		createIdxKey, err := hex.DecodeString(fields[8])
 		if err != nil {
