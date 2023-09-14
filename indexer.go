@@ -455,7 +455,7 @@ func ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) (inscrip
 				inscriptionsInvalidTransferMap[data.CreateIdxKey] = transferInfo
 			} else {
 				tokenBalance.TransferableBalance = tokenBalance.TransferableBalance.Add(balanceTransfer)
-				history.TransferableBalance = tokenBalance.TransferableBalance.String()											// update  balance
+				history.TransferableBalance = tokenBalance.TransferableBalance.String()                               // update  balance
 				history.AvailableBalance = tokenBalance.OverallBalance.Sub(tokenBalance.TransferableBalance).String() // update  balance
 
 				history.Valid = true
