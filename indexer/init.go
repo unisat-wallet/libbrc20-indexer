@@ -78,19 +78,16 @@ func (g *BRC20Indexer) ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionB
 		}
 
 		if ok := isJson(data.ContentBody); !ok {
-			log.Println("not json")
 			continue
 		}
 
 		body := new(model.InscriptionBRC20Content)
 		if err := body.Unmarshal([]byte(data.ContentBody)); err != nil {
-			log.Println("not json")
 			continue
 		}
 
 		// is inscribe deploy/mint/transfer
 		if body.Proto != constant.BRC20_P || len(body.BRC20Tick) != 4 {
-			log.Println("not proto")
 			continue
 		}
 
