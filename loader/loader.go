@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/btcsuite/btcd/chaincfg"
+	"github.com/unisat-wallet/libbrc20-indexer/constant"
 	"github.com/unisat-wallet/libbrc20-indexer/model"
 	"github.com/unisat-wallet/libbrc20-indexer/utils"
 )
@@ -158,6 +159,33 @@ func DumpTickerInfoMap(fname string,
 			len(tokenUsersBalanceData[ticker]),
 		)
 
+		// history
+		for _, h := range info.History {
+			if !h.Valid {
+				continue
+			}
+
+			addressFrom, err := utils.GetAddressFromScript([]byte(h.PkScriptFrom), &chaincfg.MainNetParams)
+			if err != nil {
+				addressFrom = hex.EncodeToString([]byte(h.PkScriptFrom))
+			}
+
+			addressTo, err := utils.GetAddressFromScript([]byte(h.PkScriptTo), &chaincfg.MainNetParams)
+			if err != nil {
+				addressTo = hex.EncodeToString([]byte(h.PkScriptTo))
+			}
+
+			fmt.Fprintf(file, "%s %s %s %s %s -> %s\n",
+				info.Ticker,
+				utils.GetReversedStringHex(h.TxId),
+				constant.BRC20_HISTORY_TYPE_NAMES[h.Type],
+				h.Amount,
+				addressFrom,
+				addressTo,
+			)
+		}
+
+		// holders
 		var allHolders []string
 		for holder := range tokenUsersBalanceData[ticker] {
 			allHolders = append(allHolders, holder)
