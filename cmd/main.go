@@ -4,7 +4,7 @@ import (
 	"flag"
 	"log"
 
-	brc20 "github.com/unisat-wallet/libbrc20-indexer"
+	"github.com/unisat-wallet/libbrc20-indexer/indexer"
 	"github.com/unisat-wallet/libbrc20-indexer/loader"
 )
 
@@ -26,7 +26,12 @@ func main() {
 		log.Fatalf("invalid input, %s", err)
 	}
 
-	inscriptionsTickerInfoMap, userTokensBalanceData, tokenUsersBalanceData, inscriptionsValidTransferDataMap := brc20.ProcessUpdateLatestBRC20(brc20Datas)
+	g := &indexer.BRC20Indexer{}
+	g.ProcessUpdateLatestBRC20(brc20Datas)
 
-	loader.DumpTickerInfoMap(outputfile, inscriptionsTickerInfoMap, userTokensBalanceData, tokenUsersBalanceData, inscriptionsValidTransferDataMap)
+	loader.DumpTickerInfoMap(outputfile,
+		g.InscriptionsTickerInfoMap,
+		g.UserTokensBalanceData,
+		g.TokenUsersBalanceData,
+	)
 }

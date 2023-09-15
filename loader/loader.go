@@ -124,7 +124,6 @@ func DumpTickerInfoMap(fname string,
 	inscriptionsTickerInfoMap map[string]*model.BRC20TokenInfo,
 	userTokensBalanceData map[string]map[string]*model.BRC20TokenBalance,
 	tokenUsersBalanceData map[string]map[string]*model.BRC20TokenBalance,
-	inscriptionsValidTransferDataMap map[string]model.InscriptionBRC20InfoResp,
 ) {
 
 	file, err := os.OpenFile(fname, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0777)

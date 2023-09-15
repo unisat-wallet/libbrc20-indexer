@@ -1,10 +1,19 @@
 package constant
 
+// brc20 protocal
+const (
+	BRC20_P = "brc-20"
+)
+
+// brc20 op
 const (
 	BRC20_OP_DEPLOY   = "deploy"
 	BRC20_OP_MINT     = "mint"
 	BRC20_OP_TRANSFER = "transfer"
+)
 
+// brc20 history
+const (
 	BRC20_HISTORY_TYPE_INSCRIBE_DEPLOY   = "inscribe-deploy"
 	BRC20_HISTORY_TYPE_INSCRIBE_MINT     = "inscribe-mint"
 	BRC20_HISTORY_TYPE_INSCRIBE_TRANSFER = "inscribe-transfer"
@@ -39,3 +48,5 @@ var BRC20_HISTORY_TYPE_NAMES []string = []string{
 	BRC20_HISTORY_TYPE_SEND,
 	BRC20_HISTORY_TYPE_RECEIVE,
 }
+
+var DEFAULT_DECIMAL_18 = "18"
