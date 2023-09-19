@@ -59,9 +59,9 @@ func isJson(contentBody []byte) bool {
 func (g *BRC20Indexer) ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) {
 	totalDataCount := len(brc20Datas)
 
-	log.Printf("ProcessUpdateLatestBRC20Swap update. total %d", len(brc20Datas))
 
 	g.initBRC20()
+	log.Printf("ProcessUpdateLatestBRC20 update. total %d", len(brc20Datas))
 
 	for idx, data := range brc20Datas {
 		progress := idx * 100 / totalDataCount
@@ -111,7 +111,7 @@ func (g *BRC20Indexer) ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionB
 		}
 	}
 
-	log.Printf("ProcessUpdateLatestBRC20Swap finish. ticker: %d, users: %d, tokens: %d, validInscription: %d, validTransfer: %d, invalidTransfer: %d",
+	log.Printf("ProcessUpdateLatestBRC20 finish. ticker: %d, users: %d, tokens: %d, validInscription: %d, validTransfer: %d, invalidTransfer: %d",
 		len(g.InscriptionsTickerInfoMap),
 		len(g.UserTokensBalanceData),
 		len(g.TokenUsersBalanceData),
