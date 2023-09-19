@@ -20,7 +20,7 @@ type InscriptionBRC20Data struct {
 	PkScript string `json:"-"`
 
 	InscriptionNumber int64
-	ContentBody       string
+	ContentBody       []byte
 	CreateIdxKey      string
 	Height            uint32 // Height of NFT show in block onCreate
 	TxIdx             uint32

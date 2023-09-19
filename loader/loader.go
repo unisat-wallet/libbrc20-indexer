@@ -17,6 +17,8 @@ import (
 )
 
 func LoadBRC20InputData(fname string) ([]*model.InscriptionBRC20Data, error) {
+	var contentMap map[string][]byte = make(map[string][]byte, 0)
+
 	file, err := os.Open(fname)
 	if err != nil {
 		return nil, err
@@ -79,11 +81,16 @@ func LoadBRC20InputData(fname string) ([]*model.InscriptionBRC20Data, error) {
 		}
 		data.InscriptionNumber = int64(inscriptionNumber)
 
-		content, err := hex.DecodeString(fields[7])
-		if err != nil {
-			return nil, err
+		if content, ok := contentMap[fields[7]]; ok {
+			data.ContentBody = content
+		} else {
+			content, err := hex.DecodeString(fields[7])
+			if err != nil {
+				return nil, err
+			}
+			data.ContentBody = content
+			contentMap[fields[7]] = content
 		}
-		data.ContentBody = string(content)
 
 		createIdxKey, err := hex.DecodeString(fields[8])
 		if err != nil {

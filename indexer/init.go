@@ -1,8 +1,8 @@
 package indexer
 
 import (
+	"bytes"
 	"log"
-	"strings"
 
 	"github.com/unisat-wallet/libbrc20-indexer/constant"
 	"github.com/unisat-wallet/libbrc20-indexer/model"
@@ -39,16 +39,16 @@ func (g *BRC20Indexer) initBRC20() {
 	g.InscriptionsInvalidTransferMap = make(map[string]*model.InscriptionBRC20TickInfo, 0)
 }
 
-func isJson(contentBody string) bool {
+func isJson(contentBody []byte) bool {
 	if len(contentBody) < 40 {
 		return false
 	}
 
-	content := strings.TrimSpace(contentBody)
-	if !strings.HasPrefix(content, "{") {
+	content := bytes.TrimSpace(contentBody)
+	if !bytes.HasPrefix(content, []byte("{")) {
 		return false
 	}
-	if !strings.HasSuffix(content, "}") {
+	if !bytes.HasSuffix(content, []byte("}")) {
 		return false
 	}
 
@@ -82,9 +82,10 @@ func (g *BRC20Indexer) ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionB
 		}
 
 		body := new(model.InscriptionBRC20Content)
-		if err := body.Unmarshal([]byte(data.ContentBody)); err != nil {
+		if err := body.Unmarshal(data.ContentBody); err != nil {
 			continue
 		}
+		data.ContentBody = nil
 
 		// is inscribe deploy/mint/transfer
 		if body.Proto != constant.BRC20_P || len(body.BRC20Tick) != 4 {
