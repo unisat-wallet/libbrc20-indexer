@@ -27,16 +27,6 @@ type InscriptionBRC20Data struct {
 	BlockTime         uint32
 }
 
-type InscriptionBRC20InfoResp struct {
-	Operation    string `json:"op,omitempty"`
-	BRC20Tick    string `json:"tick,omitempty"`
-	BRC20Max     string `json:"max,omitempty"`
-	BRC20Limit   string `json:"lim,omitempty"`
-	BRC20Amount  string `json:"amt,omitempty"`
-	BRC20Decimal string `json:"decimal,omitempty"`
-	BRC20Minted  string `json:"minted,omitempty"`
-}
-
 type InscriptionBRC20Content struct {
 	Proto        string `json:"p,omitempty"`
 	Operation    string `json:"op,omitempty"`
@@ -99,14 +89,12 @@ type BRC20TokenInfo struct {
 
 type InscriptionBRC20TickInfoResp struct {
 	Height            uint32                   `json:"-"`
-	Data              InscriptionBRC20InfoResp `json:"data"`
 	InscriptionNumber int64                    `json:"inscriptionNumber"`
 	InscriptionId     string                   `json:"inscriptionId"`
 	Confirmations     int                      `json:"confirmations"`
 }
 
 type InscriptionBRC20TickInfo struct {
-	Data  InscriptionBRC20InfoResp `json:"data"`
 	Max   *decimal.Decimal         `json:"-"`
 	Limit *decimal.Decimal         `json:"-"`
 
@@ -117,6 +105,8 @@ type InscriptionBRC20TickInfo struct {
 
 	Amount    *decimal.Decimal `json:"-"`
 	MintTimes uint32           `json:"-"`
+	BRC20Tick string           `json:"-"`
+	Operation uint8            `json:"-"`
 	Decimal   uint8            `json:"-"`
 
 	TxId string `json:"-"`
@@ -141,11 +131,8 @@ type InscriptionBRC20TickInfo struct {
 
 func NewInscriptionBRC20TickInfo(body *InscriptionBRC20Content, data *InscriptionBRC20Data) *InscriptionBRC20TickInfo {
 	info := &InscriptionBRC20TickInfo{
-		Data: InscriptionBRC20InfoResp{
-			Operation: body.Operation,
-			BRC20Tick: body.BRC20Tick,
-		},
-		Decimal: 18,
+		BRC20Tick: body.BRC20Tick,
+		Decimal:   18,
 
 		TxId: data.TxId,
 		Idx:  data.Idx,
@@ -208,7 +195,6 @@ func NewBRC20History(historyType uint8, isValid bool, isTransfer bool,
 		Valid: isValid,
 		Inscription: InscriptionBRC20TickInfoResp{
 			Height:            data.Height,
-			Data:              info.Data,
 			InscriptionNumber: info.InscriptionNumber,
 			InscriptionId:     fmt.Sprintf("%si%d", hex.EncodeToString(utils.ReverseBytes([]byte(data.TxId))), data.Idx),
 		},

@@ -32,7 +32,7 @@ func (g *BRC20Indexer) GetTransferInfoByKey(createIdxKey string) (
 
 func (g *BRC20Indexer) ProcessTransfer(progress int, data *model.InscriptionBRC20Data, transferInfo *model.InscriptionBRC20TickInfo, isInvalid bool) {
 	// ticker
-	uniqueLowerTicker := strings.ToLower(transferInfo.Data.BRC20Tick)
+	uniqueLowerTicker := strings.ToLower(transferInfo.BRC20Tick)
 	tokenInfo, ok := g.InscriptionsTickerInfoMap[uniqueLowerTicker]
 	if !ok {
 		log.Printf("(%d%%) ProcessBRC20Transfer send transfer, but ticker invalid. txid: %s",
@@ -97,7 +97,7 @@ func (g *BRC20Indexer) ProcessTransfer(progress int, data *model.InscriptionBRC2
 	// get tokenBalance to update
 	var tokenBalance *model.BRC20TokenBalance
 	if token, ok := userTokens[uniqueLowerTicker]; !ok {
-		tokenBalance = &model.BRC20TokenBalance{Ticker: transferInfo.Data.BRC20Tick, PkScript: data.PkScript}
+		tokenBalance = &model.BRC20TokenBalance{Ticker: transferInfo.BRC20Tick, PkScript: data.PkScript}
 		userTokens[uniqueLowerTicker] = tokenBalance
 
 		// set token's users
@@ -180,9 +180,6 @@ func (g *BRC20Indexer) ProcessInscribeTransfer(progress int, data *model.Inscrip
 
 	body.BRC20Tick = tokenInfo.Ticker
 	transferInfo := model.NewInscriptionBRC20TickInfo(body, data)
-	transferInfo.Data.BRC20Amount = body.BRC20Amount
-	transferInfo.Data.BRC20Limit = tinfo.Data.BRC20Limit
-	transferInfo.Data.BRC20Decimal = tinfo.Data.BRC20Decimal
 
 	transferInfo.Decimal = tinfo.Decimal
 	transferInfo.Amount = balanceTransfer

@@ -25,19 +25,15 @@ func (g *BRC20Indexer) ProcessDeploy(progress int, data *model.InscriptionBRC20D
 	}
 
 	tinfo := model.NewInscriptionBRC20TickInfo(body, data)
-	tinfo.Data.BRC20Max = body.BRC20Max
-	tinfo.Data.BRC20Limit = body.BRC20Limit
-	tinfo.Data.BRC20Decimal = body.BRC20Decimal
-	tinfo.Data.BRC20Minted = "0"
 	tinfo.InscriptionNumberStart = data.InscriptionNumber
 
 	// dec
-	if dec, err := strconv.ParseUint(tinfo.Data.BRC20Decimal, 10, 64); err != nil || dec > 18 {
+	if dec, err := strconv.ParseUint(body.BRC20Decimal, 10, 64); err != nil || dec > 18 {
 		// dec invalid
 		log.Printf("(%d%%) ProcessBRC20Deploy, but dec invalid. ticker: %s, dec: %s",
 			progress,
 			uniqueLowerTicker,
-			tinfo.Data.BRC20Decimal,
+			body.BRC20Decimal,
 		)
 		return
 	} else {
@@ -61,12 +57,12 @@ func (g *BRC20Indexer) ProcessDeploy(progress int, data *model.InscriptionBRC20D
 	}
 
 	// lim
-	if lim, precision, err := decimal.NewDecimalFromString(tinfo.Data.BRC20Limit); err != nil {
+	if lim, precision, err := decimal.NewDecimalFromString(body.BRC20Limit); err != nil {
 		// limit invalid
 		log.Printf("(%d%%) ProcessBRC20Deploy, but limit invalid. ticker: %s, limit: '%s'",
 			progress,
 			uniqueLowerTicker,
-			tinfo.Data.BRC20Limit,
+			body.BRC20Limit,
 		)
 		return
 	} else {

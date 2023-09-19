@@ -53,8 +53,6 @@ func (g *BRC20Indexer) ProcessMint(progress int, data *model.InscriptionBRC20Dat
 
 	body.BRC20Tick = tokenInfo.Ticker
 	mintInfo := model.NewInscriptionBRC20TickInfo(body, data)
-	mintInfo.Data.BRC20Amount = body.BRC20Amount
-	mintInfo.Data.BRC20Minted = amt.String()
 	mintInfo.Decimal = tinfo.Decimal
 	mintInfo.Amount = amt
 	if tinfo.TotalMinted.Cmp(tinfo.Max) >= 0 {
@@ -91,12 +89,10 @@ func (g *BRC20Indexer) ProcessMint(progress int, data *model.InscriptionBRC20Dat
 	}
 	// count
 	tinfo.MintTimes++
-	tinfo.Data.BRC20Minted = tinfo.TotalMinted.String()
 	// valid mint inscriptionNumber range
 	tinfo.InscriptionNumberEnd = data.InscriptionNumber
 
 	// update mint info
-	mintInfo.Data.BRC20Minted = balanceMinted.String()
 	mintInfo.Amount = balanceMinted
 
 	// update tokenBalance
