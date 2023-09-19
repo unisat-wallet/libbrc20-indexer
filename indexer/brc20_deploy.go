@@ -96,5 +96,5 @@ func (g *BRC20Indexer) ProcessDeploy(progress int, data *model.InscriptionBRC20D
 	tokenUsers[string(data.PkScript)] = tokenBalance
 	g.TokenUsersBalanceData[uniqueLowerTicker] = tokenUsers
 
-	// g.InscriptionsValidBRC20DataMap[data.CreateIdxKey] = tinfo.Data
+	g.InscriptionsValidBRC20DataMap[data.CreateIdxKey] = &tinfo.InscriptionBRC20TickInfo
 }

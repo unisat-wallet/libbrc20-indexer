@@ -214,6 +214,7 @@ func (g *BRC20Indexer) ProcessInscribeTransfer(progress int, data *model.Inscrip
 		}
 		tokenBalance.ValidTransferMap[data.CreateIdxKey] = transferInfo
 		g.InscriptionsValidTransferMap[data.CreateIdxKey] = transferInfo
-		g.InscriptionsValidBRC20DataMap[data.CreateIdxKey] = struct{}{}
+
+		g.InscriptionsValidBRC20DataMap[data.CreateIdxKey] = &transferInfo.InscriptionBRC20TickInfo
 	}
 }

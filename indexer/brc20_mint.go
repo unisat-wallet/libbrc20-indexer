@@ -108,5 +108,5 @@ func (g *BRC20Indexer) ProcessMint(progress int, data *model.InscriptionBRC20Dat
 	tokenInfo.History = append(tokenInfo.History, history)
 	tokenInfo.HistoryMint = append(tokenInfo.HistoryMint, history)
 
-	// g.InscriptionsValidBRC20DataMap[data.CreateIdxKey] = mintInfo.Data
+	g.InscriptionsValidBRC20DataMap[data.CreateIdxKey] = &mintInfo.InscriptionBRC20TickInfo
 }

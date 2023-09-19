@@ -12,7 +12,7 @@ type BRC20Indexer struct {
 	InscriptionsTickerInfoMap     map[string]*model.BRC20TokenInfo
 	UserTokensBalanceData         map[string]map[string]*model.BRC20TokenBalance
 	TokenUsersBalanceData         map[string]map[string]*model.BRC20TokenBalance
-	InscriptionsValidBRC20DataMap map[string]struct{}
+	InscriptionsValidBRC20DataMap map[string]*model.InscriptionBRC20TickInfo
 
 	// inner valid transfer
 	InscriptionsValidTransferMap map[string]*model.InscriptionBRC20TickTransferInfo
@@ -31,7 +31,7 @@ func (g *BRC20Indexer) initBRC20() {
 	g.TokenUsersBalanceData = make(map[string]map[string]*model.BRC20TokenBalance, 0)
 
 	// valid brc20 inscriptions
-	g.InscriptionsValidBRC20DataMap = make(map[string]struct{}, 0)
+	g.InscriptionsValidBRC20DataMap = make(map[string]*model.InscriptionBRC20TickInfo, 0)
 
 	// inner valid transfer
 	g.InscriptionsValidTransferMap = make(map[string]*model.InscriptionBRC20TickTransferInfo, 0)
