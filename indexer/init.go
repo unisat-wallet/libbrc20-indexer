@@ -15,9 +15,9 @@ type BRC20Indexer struct {
 	InscriptionsValidBRC20DataMap map[string]struct{}
 
 	// inner valid transfer
-	InscriptionsValidTransferMap map[string]*model.InscriptionBRC20TickInfo
+	InscriptionsValidTransferMap map[string]*model.InscriptionBRC20TickTransferInfo
 	// inner invalid transfer
-	InscriptionsInvalidTransferMap map[string]*model.InscriptionBRC20TickInfo
+	InscriptionsInvalidTransferMap map[string]*model.InscriptionBRC20TickTransferInfo
 }
 
 func (g *BRC20Indexer) initBRC20() {
@@ -34,9 +34,9 @@ func (g *BRC20Indexer) initBRC20() {
 	g.InscriptionsValidBRC20DataMap = make(map[string]struct{}, 0)
 
 	// inner valid transfer
-	g.InscriptionsValidTransferMap = make(map[string]*model.InscriptionBRC20TickInfo, 0)
+	g.InscriptionsValidTransferMap = make(map[string]*model.InscriptionBRC20TickTransferInfo, 0)
 	// inner invalid transfer
-	g.InscriptionsInvalidTransferMap = make(map[string]*model.InscriptionBRC20TickInfo, 0)
+	g.InscriptionsInvalidTransferMap = make(map[string]*model.InscriptionBRC20TickTransferInfo, 0)
 }
 
 func isJson(contentBody []byte) bool {

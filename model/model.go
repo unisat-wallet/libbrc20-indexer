@@ -79,7 +79,7 @@ func (body *InscriptionBRC20Content) Unmarshal(contentBody []byte) (err error) {
 
 type BRC20TokenInfo struct {
 	Ticker string
-	Deploy *InscriptionBRC20TickInfo
+	Deploy *InscriptionBRC20TickDeployInfo
 
 	History                 []*BRC20History
 	HistoryMint             []*BRC20History
@@ -94,60 +94,6 @@ type InscriptionBRC20TickInfoResp struct {
 	Confirmations     int                      `json:"confirmations"`
 }
 
-type InscriptionBRC20TickInfo struct {
-	Max   *decimal.Decimal         `json:"-"`
-	Limit *decimal.Decimal         `json:"-"`
-
-	TotalMinted        *decimal.Decimal `json:"-"`
-	ConfirmedMinted    *decimal.Decimal `json:"-"`
-	ConfirmedMinted1h  *decimal.Decimal `json:"-"`
-	ConfirmedMinted24h *decimal.Decimal `json:"-"`
-
-	Amount    *decimal.Decimal `json:"-"`
-	MintTimes uint32           `json:"-"`
-	BRC20Tick string           `json:"-"`
-	Operation uint8            `json:"-"`
-	Decimal   uint8            `json:"-"`
-
-	TxId string `json:"-"`
-	Idx  uint32 `json:"-"`
-	Vout uint32 `json:"-"`
-
-	Satoshi  uint64 `json:"-"`
-	PkScript string `json:"-"`
-
-	InscriptionNumber int64  `json:"inscriptionNumber"`
-	CreateIdxKey      string `json:"-"`
-	Height            uint32 `json:"-"`
-	TxIdx             uint32 `json:"-"`
-	BlockTime         uint32 `json:"-"`
-
-	CompleteHeight    uint32 `json:"-"`
-	CompleteBlockTime uint32 `json:"-"`
-
-	InscriptionNumberStart int64 `json:"-"`
-	InscriptionNumberEnd   int64 `json:"-"`
-}
-
-func NewInscriptionBRC20TickInfo(body *InscriptionBRC20Content, data *InscriptionBRC20Data) *InscriptionBRC20TickInfo {
-	info := &InscriptionBRC20TickInfo{
-		BRC20Tick: body.BRC20Tick,
-		Decimal:   18,
-
-		TxId: data.TxId,
-		Idx:  data.Idx,
-		Vout: data.Vout,
-
-		Satoshi:  data.Satoshi,
-		PkScript: data.PkScript,
-
-		InscriptionNumber: data.InscriptionNumber,
-		CreateIdxKey:      data.CreateIdxKey,
-		Height:            data.Height,
-		TxIdx:             data.TxIdx,
-		BlockTime:         data.BlockTime,
-	}
-	return info
 }
 
 type BRC20TokenBalance struct {
@@ -156,8 +102,8 @@ type BRC20TokenBalance struct {
 	OverallBalanceSafe  *decimal.Decimal
 	OverallBalance      *decimal.Decimal
 	TransferableBalance *decimal.Decimal
-	InvalidTransferList []*InscriptionBRC20TickInfo
-	ValidTransferMap    map[string]*InscriptionBRC20TickInfo
+	InvalidTransferList []*InscriptionBRC20TickTransferInfo
+	ValidTransferMap    map[string]*InscriptionBRC20TickTransferInfo
 
 	History                 []*BRC20History
 	HistoryMint             []*BRC20History

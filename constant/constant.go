@@ -12,6 +12,12 @@ const (
 	BRC20_OP_TRANSFER = "transfer"
 )
 
+const (
+	BRC20_OP_N_DEPLOY   = 0
+	BRC20_OP_N_MINT     = 1
+	BRC20_OP_N_TRANSFER = 2
+)
+
 // brc20 history
 const (
 	BRC20_HISTORY_TYPE_INSCRIBE_DEPLOY   = "inscribe-deploy"

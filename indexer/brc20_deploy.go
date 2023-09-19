@@ -24,7 +24,7 @@ func (g *BRC20Indexer) ProcessDeploy(progress int, data *model.InscriptionBRC20D
 		return
 	}
 
-	tinfo := model.NewInscriptionBRC20TickInfo(body, data)
+	tinfo := model.NewInscriptionBRC20TickDeployInfo(body, data)
 	tinfo.InscriptionNumberStart = data.InscriptionNumber
 
 	// dec
@@ -77,7 +77,7 @@ func (g *BRC20Indexer) ProcessDeploy(progress int, data *model.InscriptionBRC20D
 
 	tokenBalance := &model.BRC20TokenBalance{Ticker: body.BRC20Tick, PkScript: data.PkScript}
 
-	history := model.NewBRC20History(constant.BRC20_HISTORY_TYPE_N_INSCRIBE_DEPLOY, true, false, tinfo, nil, data)
+	history := model.NewBRC20History(constant.BRC20_HISTORY_TYPE_N_INSCRIBE_DEPLOY, true, false, &tinfo.InscriptionBRC20TickInfo, nil, data)
 	tokenBalance.History = append(tokenBalance.History, history)
 	tokenInfo.History = append(tokenInfo.History, history)
 

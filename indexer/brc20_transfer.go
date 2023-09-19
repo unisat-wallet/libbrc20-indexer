@@ -11,7 +11,7 @@ import (
 )
 
 func (g *BRC20Indexer) GetTransferInfoByKey(createIdxKey string) (
-	transferInfo *model.InscriptionBRC20TickInfo, isInvalid bool) {
+	transferInfo *model.InscriptionBRC20TickTransferInfo, isInvalid bool) {
 	var ok bool
 	// transfer
 	transferInfo, ok = g.InscriptionsValidTransferMap[createIdxKey]
@@ -30,7 +30,7 @@ func (g *BRC20Indexer) GetTransferInfoByKey(createIdxKey string) (
 	return transferInfo, isInvalid
 }
 
-func (g *BRC20Indexer) ProcessTransfer(progress int, data *model.InscriptionBRC20Data, transferInfo *model.InscriptionBRC20TickInfo, isInvalid bool) {
+func (g *BRC20Indexer) ProcessTransfer(progress int, data *model.InscriptionBRC20Data, transferInfo *model.InscriptionBRC20TickTransferInfo, isInvalid bool) {
 	// ticker
 	uniqueLowerTicker := strings.ToLower(transferInfo.BRC20Tick)
 	tokenInfo, ok := g.InscriptionsTickerInfoMap[uniqueLowerTicker]
@@ -43,7 +43,7 @@ func (g *BRC20Indexer) ProcessTransfer(progress int, data *model.InscriptionBRC2
 	}
 
 	// global history
-	history := model.NewBRC20History(constant.BRC20_HISTORY_TYPE_N_TRANSFER, !isInvalid, true, transferInfo, nil, data)
+	history := model.NewBRC20History(constant.BRC20_HISTORY_TYPE_N_TRANSFER, !isInvalid, true, &transferInfo.InscriptionBRC20TickInfo, nil, data)
 	tokenInfo.History = append(tokenInfo.History, history)
 	tokenInfo.HistoryTransfer = append(tokenInfo.HistoryTransfer, history)
 
@@ -70,7 +70,7 @@ func (g *BRC20Indexer) ProcessTransfer(progress int, data *model.InscriptionBRC2
 	}
 
 	if isInvalid {
-		fromHistory := model.NewBRC20History(constant.BRC20_HISTORY_TYPE_N_SEND, false, true, transferInfo, fromTokenBalance, data)
+		fromHistory := model.NewBRC20History(constant.BRC20_HISTORY_TYPE_N_SEND, false, true, &transferInfo.InscriptionBRC20TickInfo, fromTokenBalance, data)
 		fromTokenBalance.History = append(fromTokenBalance.History, fromHistory)
 		fromTokenBalance.HistorySend = append(fromTokenBalance.HistorySend, fromHistory)
 		return
@@ -113,7 +113,7 @@ func (g *BRC20Indexer) ProcessTransfer(progress int, data *model.InscriptionBRC2
 	fromTokenBalance.TransferableBalance = fromTokenBalance.TransferableBalance.Sub(transferInfo.Amount)
 	delete(fromTokenBalance.ValidTransferMap, data.CreateIdxKey)
 
-	fromHistory := model.NewBRC20History(constant.BRC20_HISTORY_TYPE_N_SEND, true, true, transferInfo, fromTokenBalance, data)
+	fromHistory := model.NewBRC20History(constant.BRC20_HISTORY_TYPE_N_SEND, true, true, &transferInfo.InscriptionBRC20TickInfo, fromTokenBalance, data)
 	fromTokenBalance.History = append(fromTokenBalance.History, fromHistory)
 	fromTokenBalance.HistorySend = append(fromTokenBalance.HistorySend, fromHistory)
 
@@ -123,7 +123,7 @@ func (g *BRC20Indexer) ProcessTransfer(progress int, data *model.InscriptionBRC2
 	}
 	tokenBalance.OverallBalance = tokenBalance.OverallBalance.Add(transferInfo.Amount)
 
-	toHistory := model.NewBRC20History(constant.BRC20_HISTORY_TYPE_N_RECEIVE, true, true, transferInfo, tokenBalance, data)
+	toHistory := model.NewBRC20History(constant.BRC20_HISTORY_TYPE_N_RECEIVE, true, true, &transferInfo.InscriptionBRC20TickInfo, tokenBalance, data)
 	tokenBalance.History = append(tokenBalance.History, toHistory)
 	tokenBalance.HistoryReceive = append(tokenBalance.HistoryReceive, toHistory)
 }
@@ -179,12 +179,12 @@ func (g *BRC20Indexer) ProcessInscribeTransfer(progress int, data *model.Inscrip
 	}
 
 	body.BRC20Tick = tokenInfo.Ticker
-	transferInfo := model.NewInscriptionBRC20TickInfo(body, data)
+	transferInfo := model.NewInscriptionBRC20TickTransferInfo(body, data)
 
 	transferInfo.Decimal = tinfo.Decimal
 	transferInfo.Amount = balanceTransfer
 
-	history := model.NewBRC20History(constant.BRC20_HISTORY_TYPE_N_INSCRIBE_TRANSFER, true, false, transferInfo, tokenBalance, data)
+	history := model.NewBRC20History(constant.BRC20_HISTORY_TYPE_N_INSCRIBE_TRANSFER, true, false, &transferInfo.InscriptionBRC20TickInfo, tokenBalance, data)
 	if tokenBalance.OverallBalance.Sub(tokenBalance.TransferableBalance).Cmp(balanceTransfer) < 0 { // invalid
 		history.Valid = false
 		// user history
@@ -210,7 +210,7 @@ func (g *BRC20Indexer) ProcessInscribeTransfer(progress int, data *model.Inscrip
 		tokenInfo.HistoryInscribeTransfer = append(tokenInfo.HistoryInscribeTransfer, history)
 
 		if tokenBalance.ValidTransferMap == nil {
-			tokenBalance.ValidTransferMap = make(map[string]*model.InscriptionBRC20TickInfo, 1)
+			tokenBalance.ValidTransferMap = make(map[string]*model.InscriptionBRC20TickTransferInfo, 1)
 		}
 		tokenBalance.ValidTransferMap[data.CreateIdxKey] = transferInfo
 		g.InscriptionsValidTransferMap[data.CreateIdxKey] = transferInfo
