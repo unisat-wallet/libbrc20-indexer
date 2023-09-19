@@ -1,7 +1,6 @@
 package model
 
 import (
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 
@@ -140,7 +139,7 @@ func NewBRC20History(historyType uint8, isValid bool, isTransfer bool,
 		Inscription: InscriptionBRC20TickInfoResp{
 			Height:            data.Height,
 			InscriptionNumber: info.InscriptionNumber,
-			InscriptionId:     fmt.Sprintf("%si%d", hex.EncodeToString(utils.ReverseBytes([]byte(data.TxId))), data.Idx),
+			InscriptionId:     fmt.Sprintf("%si%d", utils.GetReversedStringHex(info.TxId), info.Idx),
 		},
 		Amount:    info.Amount.String(),
 		Height:    data.Height,
