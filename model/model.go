@@ -88,12 +88,10 @@ type BRC20TokenInfo struct {
 }
 
 type InscriptionBRC20TickInfoResp struct {
-	Height            uint32                   `json:"-"`
-	InscriptionNumber int64                    `json:"inscriptionNumber"`
-	InscriptionId     string                   `json:"inscriptionId"`
-	Confirmations     int                      `json:"confirmations"`
-}
-
+	Height            uint32 `json:"-"`
+	InscriptionNumber int64  `json:"inscriptionNumber"`
+	InscriptionId     string `json:"inscriptionId"`
+	Confirmations     int    `json:"confirmations"`
 }
 
 type BRC20TokenBalance struct {
