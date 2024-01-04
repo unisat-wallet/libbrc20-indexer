@@ -35,7 +35,7 @@ func LoadBRC20InputData(fname string) ([]*model.InscriptionBRC20Data, error) {
 		line := scanner.Text()
 		fields := strings.Split(line, " ")
 
-		if len(fields) != 12 {
+		if len(fields) != 14 {
 			return nil, fmt.Errorf("invalid data format")
 		}
 
@@ -63,59 +63,71 @@ func LoadBRC20InputData(fname string) ([]*model.InscriptionBRC20Data, error) {
 		}
 		data.Vout = uint32(vout)
 
-		satoshi, err := strconv.ParseUint(fields[4], 10, 64)
+		offset, err := strconv.ParseUint(fields[4], 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		data.Offset = uint32(offset)
+
+		satoshi, err := strconv.ParseUint(fields[5], 10, 64)
 		if err != nil {
 			return nil, err
 		}
 		data.Satoshi = uint64(satoshi)
 
-		pkScript, err := hex.DecodeString(fields[5])
+		pkScript, err := hex.DecodeString(fields[6])
 		if err != nil {
 			return nil, err
 		}
 		data.PkScript = string(pkScript)
 
-		inscriptionNumber, err := strconv.ParseInt(fields[6], 10, 64)
+		inscriptionNumber, err := strconv.ParseInt(fields[7], 10, 64)
 		if err != nil {
 			return nil, err
 		}
 		data.InscriptionNumber = int64(inscriptionNumber)
 
-		if content, ok := contentMap[fields[7]]; ok {
+		if content, ok := contentMap[fields[8]]; ok {
 			data.ContentBody = content
 		} else {
-			content, err := hex.DecodeString(fields[7])
+			content, err := hex.DecodeString(fields[8])
 			if err != nil {
 				return nil, err
 			}
 			data.ContentBody = content
-			contentMap[fields[7]] = content
+			contentMap[fields[8]] = content
 		}
 
-		createIdxKey, err := hex.DecodeString(fields[8])
+		createIdxKey, err := hex.DecodeString(fields[9])
 		if err != nil {
 			return nil, err
 		}
 
 		data.CreateIdxKey = string(createIdxKey)
 
-		height, err := strconv.ParseUint(fields[9], 10, 32)
+		height, err := strconv.ParseUint(fields[10], 10, 32)
 		if err != nil {
 			return nil, err
 		}
 		data.Height = uint32(height)
 
-		txIdx, err := strconv.ParseUint(fields[10], 10, 32)
+		txIdx, err := strconv.ParseUint(fields[11], 10, 32)
 		if err != nil {
 			return nil, err
 		}
 		data.TxIdx = uint32(txIdx)
 
-		blockTime, err := strconv.ParseUint(fields[11], 10, 32)
+		blockTime, err := strconv.ParseUint(fields[12], 10, 32)
 		if err != nil {
 			return nil, err
 		}
 		data.BlockTime = uint32(blockTime)
+
+		sequence, err := strconv.ParseUint(fields[13], 10, 16)
+		if err != nil {
+			return nil, err
+		}
+		data.Sequence = uint16(sequence)
 
 		brc20Datas = append(brc20Datas, &data)
 	}

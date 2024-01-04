@@ -14,6 +14,7 @@ type InscriptionBRC20Data struct {
 	TxId       string `json:"-"`
 	Idx        uint32 `json:"-"`
 	Vout       uint32 `json:"-"`
+	Offset     uint32 `json:"-"`
 
 	Satoshi  uint64 `json:"-"`
 	PkScript string `json:"-"`
@@ -24,6 +25,7 @@ type InscriptionBRC20Data struct {
 	Height            uint32 // Height of NFT show in block onCreate
 	TxIdx             uint32
 	BlockTime         uint32
+	Sequence          uint16
 }
 
 type InscriptionBRC20Content struct {
