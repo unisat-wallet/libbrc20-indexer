@@ -42,6 +42,14 @@ func (g *BRC20Indexer) ProcessTransfer(progress int, data *model.InscriptionBRC2
 		return
 	}
 
+	// to
+	senderPkScript := string(transferInfo.PkScript)
+	receiverPkScript := string(data.PkScript)
+	if data.Satoshi == 0 {
+		receiverPkScript = senderPkScript
+		data.PkScript = senderPkScript
+	}
+
 	// global history
 	history := model.NewBRC20History(constant.BRC20_HISTORY_TYPE_N_TRANSFER, !isInvalid, true, &transferInfo.InscriptionBRC20TickInfo, nil, data)
 	tokenInfo.History = append(tokenInfo.History, history)
@@ -49,7 +57,7 @@ func (g *BRC20Indexer) ProcessTransfer(progress int, data *model.InscriptionBRC2
 
 	// from
 	// get user's tokens to update
-	fromUserTokens, ok := g.UserTokensBalanceData[string(transferInfo.PkScript)]
+	fromUserTokens, ok := g.UserTokensBalanceData[senderPkScript]
 	if !ok {
 		log.Printf("(%d%%) ProcessBRC20Transfer send from user missing. height: %d, txidx: %d",
 			progress,
@@ -88,21 +96,21 @@ func (g *BRC20Indexer) ProcessTransfer(progress int, data *model.InscriptionBRC2
 	// to
 	// get user's tokens to update
 	var userTokens map[string]*model.BRC20TokenBalance
-	if tokens, ok := g.UserTokensBalanceData[string(data.PkScript)]; !ok {
+	if tokens, ok := g.UserTokensBalanceData[receiverPkScript]; !ok {
 		userTokens = make(map[string]*model.BRC20TokenBalance, 0)
-		g.UserTokensBalanceData[string(data.PkScript)] = userTokens
+		g.UserTokensBalanceData[receiverPkScript] = userTokens
 	} else {
 		userTokens = tokens
 	}
 	// get tokenBalance to update
 	var tokenBalance *model.BRC20TokenBalance
 	if token, ok := userTokens[uniqueLowerTicker]; !ok {
-		tokenBalance = &model.BRC20TokenBalance{Ticker: transferInfo.BRC20Tick, PkScript: data.PkScript}
+		tokenBalance = &model.BRC20TokenBalance{Ticker: transferInfo.BRC20Tick, PkScript: receiverPkScript}
 		userTokens[uniqueLowerTicker] = tokenBalance
 
 		// set token's users
 		tokenUsers := g.TokenUsersBalanceData[uniqueLowerTicker]
-		tokenUsers[string(data.PkScript)] = tokenBalance
+		tokenUsers[receiverPkScript] = tokenBalance
 	} else {
 		tokenBalance = token
 	}

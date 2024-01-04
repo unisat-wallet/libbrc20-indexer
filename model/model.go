@@ -155,6 +155,10 @@ func NewBRC20History(historyType uint8, isValid bool, isTransfer bool,
 		history.PkScriptFrom = info.PkScript
 		history.PkScriptTo = data.PkScript
 		history.Satoshi = data.Satoshi
+		if history.Satoshi == 0 {
+			history.PkScriptTo = history.PkScriptFrom
+		}
+
 	} else {
 		history.TxId = info.TxId
 		history.Vout = info.Vout
