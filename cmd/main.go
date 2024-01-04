@@ -11,9 +11,11 @@ import (
 var (
 	inputfile  string
 	outputfile string
+	testnet    bool
 )
 
 func init() {
+	flag.BoolVar(&testnet, "testnet", false, "testnet")
 	flag.StringVar(&inputfile, "input", "./data/brc20.input.txt", "the filename of input data, default(./data/brc20.input.txt)")
 	flag.StringVar(&outputfile, "output", "./data/brc20.output.txt", "the filename of output result, default(./data/brc20.output.txt)")
 
@@ -33,5 +35,6 @@ func main() {
 		g.InscriptionsTickerInfoMap,
 		g.UserTokensBalanceData,
 		g.TokenUsersBalanceData,
+		testnet,
 	)
 }

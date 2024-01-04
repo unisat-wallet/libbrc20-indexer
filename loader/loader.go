@@ -27,7 +27,7 @@ func LoadBRC20InputData(fname string) ([]*model.InscriptionBRC20Data, error) {
 
 	var brc20Datas []*model.InscriptionBRC20Data
 	scanner := bufio.NewScanner(file)
-	max := 4 * 1024 * 1024
+	max := 128 * 1024 * 1024
 	buf := make([]byte, max)
 	scanner.Buffer(buf, max)
 
@@ -143,7 +143,13 @@ func DumpTickerInfoMap(fname string,
 	inscriptionsTickerInfoMap map[string]*model.BRC20TokenInfo,
 	userTokensBalanceData map[string]map[string]*model.BRC20TokenBalance,
 	tokenUsersBalanceData map[string]map[string]*model.BRC20TokenBalance,
+	testnet bool,
 ) {
+
+	netParams := &chaincfg.MainNetParams
+	if testnet {
+		netParams = &chaincfg.TestNet3Params
+	}
 
 	file, err := os.OpenFile(fname, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0777)
 	if err != nil {
@@ -183,12 +189,12 @@ func DumpTickerInfoMap(fname string,
 				continue
 			}
 
-			addressFrom, err := utils.GetAddressFromScript([]byte(h.PkScriptFrom), &chaincfg.MainNetParams)
+			addressFrom, err := utils.GetAddressFromScript([]byte(h.PkScriptFrom), netParams)
 			if err != nil {
 				addressFrom = hex.EncodeToString([]byte(h.PkScriptFrom))
 			}
 
-			addressTo, err := utils.GetAddressFromScript([]byte(h.PkScriptTo), &chaincfg.MainNetParams)
+			addressTo, err := utils.GetAddressFromScript([]byte(h.PkScriptTo), netParams)
 			if err != nil {
 				addressTo = hex.EncodeToString([]byte(h.PkScriptTo))
 			}
@@ -216,7 +222,7 @@ func DumpTickerInfoMap(fname string,
 		for _, holder := range allHolders {
 			balanceData := tokenUsersBalanceData[ticker][holder]
 
-			address, err := utils.GetAddressFromScript([]byte(balanceData.PkScript), &chaincfg.MainNetParams)
+			address, err := utils.GetAddressFromScript([]byte(balanceData.PkScript), netParams)
 			if err != nil {
 				address = hex.EncodeToString([]byte(balanceData.PkScript))
 			}
