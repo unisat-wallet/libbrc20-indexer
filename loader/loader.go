@@ -35,15 +35,18 @@ func LoadBRC20InputData(fname string) ([]*model.InscriptionBRC20Data, error) {
 		line := scanner.Text()
 		fields := strings.Split(line, " ")
 
-		if len(fields) != 14 {
+		if len(fields) != 13 {
 			return nil, fmt.Errorf("invalid data format")
 		}
 
 		var data model.InscriptionBRC20Data
-		data.IsTransfer, err = strconv.ParseBool(fields[0])
+
+		sequence, err := strconv.ParseUint(fields[0], 10, 16)
 		if err != nil {
 			return nil, err
 		}
+		data.Sequence = uint16(sequence)
+		data.IsTransfer = (data.Sequence > 0)
 
 		txid, err := hex.DecodeString(fields[1])
 		if err != nil {
@@ -122,12 +125,6 @@ func LoadBRC20InputData(fname string) ([]*model.InscriptionBRC20Data, error) {
 			return nil, err
 		}
 		data.BlockTime = uint32(blockTime)
-
-		sequence, err := strconv.ParseUint(fields[13], 10, 16)
-		if err != nil {
-			return nil, err
-		}
-		data.Sequence = uint16(sequence)
 
 		brc20Datas = append(brc20Datas, &data)
 	}
