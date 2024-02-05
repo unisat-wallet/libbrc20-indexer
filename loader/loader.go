@@ -17,14 +17,13 @@ import (
 	"github.com/unisat-wallet/libbrc20-indexer/utils"
 )
 
-func LoadBRC20InputData(fname string) ([]*model.InscriptionBRC20Data, error) {
+func LoadBRC20InputData(fname string, brc20Datas chan *model.InscriptionBRC20Data) error {
 	file, err := os.Open(fname)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer file.Close()
 
-	var brc20Datas []*model.InscriptionBRC20Data
 	scanner := bufio.NewScanner(file)
 	max := 128 * 1024 * 1024
 	buf := make([]byte, max)
@@ -35,93 +34,93 @@ func LoadBRC20InputData(fname string) ([]*model.InscriptionBRC20Data, error) {
 		fields := strings.Split(line, " ")
 
 		if len(fields) != 13 {
-			return nil, fmt.Errorf("invalid data format")
+			return fmt.Errorf("invalid data format")
 		}
 
 		var data model.InscriptionBRC20Data
 
 		sequence, err := strconv.ParseUint(fields[0], 10, 16)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		data.Sequence = uint16(sequence)
 		data.IsTransfer = (data.Sequence > 0)
 
 		txid, err := hex.DecodeString(fields[1])
 		if err != nil {
-			return nil, err
+			return err
 		}
 		data.TxId = string(txid)
 
 		idx, err := strconv.ParseUint(fields[2], 10, 32)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		data.Idx = uint32(idx)
 
 		vout, err := strconv.ParseUint(fields[3], 10, 32)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		data.Vout = uint32(vout)
 
 		offset, err := strconv.ParseUint(fields[4], 10, 64)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		data.Offset = uint64(offset)
 
 		satoshi, err := strconv.ParseUint(fields[5], 10, 64)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		data.Satoshi = uint64(satoshi)
 
 		pkScript, err := hex.DecodeString(fields[6])
 		if err != nil {
-			return nil, err
+			return err
 		}
 		data.PkScript = string(pkScript)
 
 		inscriptionNumber, err := strconv.ParseInt(fields[7], 10, 64)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		data.InscriptionNumber = int64(inscriptionNumber)
 
 		content, err := hex.DecodeString(fields[8])
 		if err != nil {
-			return nil, err
+			return err
 		}
 		data.ContentBody = content
 		data.CreateIdxKey = string(fields[9])
 
 		height, err := strconv.ParseUint(fields[10], 10, 32)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		data.Height = uint32(height)
 
 		txIdx, err := strconv.ParseUint(fields[11], 10, 32)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		data.TxIdx = uint32(txIdx)
 
 		blockTime, err := strconv.ParseUint(fields[12], 10, 32)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		data.BlockTime = uint32(blockTime)
 
-		brc20Datas = append(brc20Datas, &data)
+		brc20Datas <- &data
 	}
 
 	if err := scanner.Err(); err != nil {
-		return nil, err
+		return err
 	}
 
-	return brc20Datas, nil
+	return nil
 }
 
 func DumpTickerInfoMap(fname string,
