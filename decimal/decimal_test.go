@@ -12,12 +12,18 @@ func TestNewDecimalFromString(t *testing.T) {
 		want  string
 		err   bool
 	}{
+		// valid
 		{"123456789.123456789", "123456789.123456789", false},
 		{"123456789.123", "123456789.123", false},
 		{"123456789", "123456789", false},
 		{"-123456789.123456789", "-123456789.123456789", false},
 		{"-123456789.123", "-123456789.123", false},
 		{"-123456789", "-123456789", false},
+		{"000001", "1", false},
+		{"000001.1", "1.1", false},
+		{"000001.100000000000000000", "1.1", false},
+
+		// invalid
 		{"", "", true},
 		{" ", "", true},
 		{".", "", true},
@@ -35,11 +41,12 @@ func TestNewDecimalFromString(t *testing.T) {
 		{"123.456.789", "", true},
 		{"123456789.", "123456789", true},
 		{"123456789.12345678901234567891", "", true},
+		{"0.1000000000000000000", "", true},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.input, func(t *testing.T) {
-			got, _, err := decimal.NewDecimalFromString(tc.input)
+			got, err := decimal.NewDecimalFromString(tc.input, 18)
 			if (err != nil) != tc.err {
 				t.Fatalf("unexpected error: %v", err)
 			}
@@ -65,8 +72,8 @@ func TestDecimal_Add(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.a+"+"+tc.b, func(t *testing.T) {
-			da, _, _ := decimal.NewDecimalFromString(tc.a)
-			db, _, _ := decimal.NewDecimalFromString(tc.b)
+			da, _ := decimal.NewDecimalFromString(tc.a, 18)
+			db, _ := decimal.NewDecimalFromString(tc.b, 18)
 			got := da.Add(db)
 			if got.String() != tc.want {
 				t.Errorf("got %s, want %s", got.String(), tc.want)
@@ -90,8 +97,8 @@ func TestDecimal_Sub(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.a+"-"+tc.b, func(t *testing.T) {
-			da, _, _ := decimal.NewDecimalFromString(tc.a)
-			db, _, _ := decimal.NewDecimalFromString(tc.b)
+			da, _ := decimal.NewDecimalFromString(tc.a, 18)
+			db, _ := decimal.NewDecimalFromString(tc.b, 18)
 			got := da.Sub(db)
 			if got.String() != tc.want {
 				t.Errorf("got %s, want %s", got.String(), tc.want)
@@ -117,7 +124,7 @@ func TestDecimal_String(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.input, func(t *testing.T) {
-			d, _, _ := decimal.NewDecimalFromString(tc.input)
+			d, _ := decimal.NewDecimalFromString(tc.input, 18)
 			got := d.String()
 			if got != tc.want {
 				t.Errorf("got %s, want %s", got, tc.want)
@@ -127,16 +134,16 @@ func TestDecimal_String(t *testing.T) {
 }
 
 func BenchmarkAdd(b *testing.B) {
-	d1, _, _ := decimal.NewDecimalFromString("123456789.123456789")
-	d2, _, _ := decimal.NewDecimalFromString("987654321.987654321")
+	d1, _ := decimal.NewDecimalFromString("123456789.123456789", 18)
+	d2, _ := decimal.NewDecimalFromString("987654321.987654321", 18)
 	for n := 0; n < b.N; n++ {
 		d1.Add(d2)
 	}
 }
 
 func BenchmarkSub(b *testing.B) {
-	d1, _, _ := decimal.NewDecimalFromString("123456789.123456789")
-	d2, _, _ := decimal.NewDecimalFromString("987654321.987654321")
+	d1, _ := decimal.NewDecimalFromString("123456789.123456789", 18)
+	d2, _ := decimal.NewDecimalFromString("987654321.987654321", 18)
 	for n := 0; n < b.N; n++ {
 		d1.Sub(d2)
 	}

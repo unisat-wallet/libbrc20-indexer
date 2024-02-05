@@ -1,14 +1,28 @@
 package model
 
 import (
+	"encoding/binary"
 	"encoding/json"
 	"fmt"
 
-	"github.com/unisat-wallet/libbrc20-indexer/constant"
 	"github.com/unisat-wallet/libbrc20-indexer/decimal"
 	"github.com/unisat-wallet/libbrc20-indexer/utils"
 )
 
+// nft create point on create
+type NFTCreateIdxKey struct {
+	Height     uint32 // Height of NFT show in block onCreate
+	IdxInBlock uint64 // Index of NFT show in block onCreate
+}
+
+func (p *NFTCreateIdxKey) String() string {
+	var key [12]byte
+	binary.LittleEndian.PutUint32(key[0:4], p.Height)
+	binary.LittleEndian.PutUint64(key[4:12], p.IdxInBlock)
+	return string(key[:])
+}
+
+// event raw data
 type InscriptionBRC20Data struct {
 	IsTransfer bool
 	TxId       string `json:"-"`
@@ -22,23 +36,92 @@ type InscriptionBRC20Data struct {
 	InscriptionNumber int64
 	ContentBody       []byte
 	CreateIdxKey      string
-	Height            uint32 // Height of NFT show in block onCreate
-	TxIdx             uint32
-	BlockTime         uint32
-	Sequence          uint16
+
+	Height    uint32 // Height of NFT show in block onCreate
+	TxIdx     uint32
+	BlockTime uint32
+	Sequence  uint16
+
+	// for cache
+	InscriptionId string
 }
 
-type InscriptionBRC20Content struct {
+func (data *InscriptionBRC20Data) GetInscriptionId() string {
+	if data.InscriptionId == "" {
+		data.InscriptionId = fmt.Sprintf("%si%d", utils.HashString([]byte(data.TxId)), data.Idx)
+	}
+	return data.InscriptionId
+}
+
+type InscriptionBRC20InfoResp struct {
+	Operation    string `json:"op,omitempty"`
+	BRC20Tick    string `json:"tick,omitempty"`
+	BRC20Max     string `json:"max,omitempty"`
+	BRC20Limit   string `json:"lim,omitempty"`
+	BRC20Amount  string `json:"amt,omitempty"`
+	BRC20Decimal string `json:"decimal,omitempty"`
+	BRC20Minted  string `json:"minted,omitempty"`
+}
+
+// decode protocal
+type InscriptionBRC20ProtocalContent struct {
+	Proto     string `json:"p,omitempty"`
+	Operation string `json:"op,omitempty"`
+}
+
+func (body *InscriptionBRC20ProtocalContent) Unmarshal(contentBody []byte) (err error) {
+	var bodyMap map[string]interface{} = make(map[string]interface{}, 8)
+	if err := json.Unmarshal(contentBody, &bodyMap); err != nil {
+		return err
+	}
+	if v, ok := bodyMap["p"].(string); ok {
+		body.Proto = v
+	}
+	if v, ok := bodyMap["op"].(string); ok {
+		body.Operation = v
+	}
+	return nil
+}
+
+// decode mint/transfer
+type InscriptionBRC20MintTransferContent struct {
+	Proto       string `json:"p,omitempty"`
+	Operation   string `json:"op,omitempty"`
+	BRC20Tick   string `json:"tick,omitempty"`
+	BRC20Amount string `json:"amt,omitempty"`
+}
+
+func (body *InscriptionBRC20MintTransferContent) Unmarshal(contentBody []byte) (err error) {
+	var bodyMap map[string]interface{} = make(map[string]interface{}, 8)
+	if err := json.Unmarshal(contentBody, &bodyMap); err != nil {
+		return err
+	}
+	if v, ok := bodyMap["p"].(string); ok {
+		body.Proto = v
+	}
+	if v, ok := bodyMap["op"].(string); ok {
+		body.Operation = v
+	}
+	if v, ok := bodyMap["tick"].(string); ok {
+		body.BRC20Tick = v
+	}
+	if v, ok := bodyMap["amt"].(string); ok {
+		body.BRC20Amount = v
+	}
+	return nil
+}
+
+// decode deploy data
+type InscriptionBRC20DeployContent struct {
 	Proto        string `json:"p,omitempty"`
 	Operation    string `json:"op,omitempty"`
 	BRC20Tick    string `json:"tick,omitempty"`
 	BRC20Max     string `json:"max,omitempty"`
-	BRC20Amount  string `json:"amt,omitempty"`
-	BRC20Limit   string `json:"lim,omitempty"` // option
-	BRC20Decimal string `json:"dec,omitempty"` // option
+	BRC20Limit   string `json:"lim,omitempty"`
+	BRC20Decimal string `json:"dec,omitempty"`
 }
 
-func (body *InscriptionBRC20Content) Unmarshal(contentBody []byte) (err error) {
+func (body *InscriptionBRC20DeployContent) Unmarshal(contentBody []byte) (err error) {
 	var bodyMap map[string]interface{} = make(map[string]interface{}, 8)
 	if err := json.Unmarshal(contentBody, &bodyMap); err != nil {
 		return err
@@ -55,10 +138,6 @@ func (body *InscriptionBRC20Content) Unmarshal(contentBody []byte) (err error) {
 	if v, ok := bodyMap["max"].(string); ok {
 		body.BRC20Max = v
 	}
-	if v, ok := bodyMap["amt"].(string); ok {
-		body.BRC20Amount = v
-	}
-
 	if _, ok := bodyMap["lim"]; !ok {
 		body.BRC20Limit = body.BRC20Max
 	} else {
@@ -68,7 +147,7 @@ func (body *InscriptionBRC20Content) Unmarshal(contentBody []byte) (err error) {
 	}
 
 	if _, ok := bodyMap["dec"]; !ok {
-		body.BRC20Decimal = constant.DEFAULT_DECIMAL_18
+		body.BRC20Decimal = decimal.MAX_PRECISION_STRING
 	} else {
 		if v, ok := bodyMap["dec"].(string); ok {
 			body.BRC20Decimal = v
@@ -78,9 +157,10 @@ func (body *InscriptionBRC20Content) Unmarshal(contentBody []byte) (err error) {
 	return nil
 }
 
+// all ticker (state and history)
 type BRC20TokenInfo struct {
 	Ticker string
-	Deploy *InscriptionBRC20TickDeployInfo
+	Deploy *InscriptionBRC20TickInfo
 
 	History                 []*BRC20History
 	HistoryMint             []*BRC20History
@@ -88,21 +168,129 @@ type BRC20TokenInfo struct {
 	HistoryTransfer         []*BRC20History
 }
 
-type InscriptionBRC20TickInfoResp struct {
-	Height            uint32 `json:"-"`
-	InscriptionNumber int64  `json:"inscriptionNumber"`
-	InscriptionId     string `json:"inscriptionId"`
-	Confirmations     int    `json:"confirmations"`
+type InscriptionBRC20TransferInfo struct {
+	Tick   string
+	Amount *decimal.Decimal
+	Data   *InscriptionBRC20Data
 }
 
+// inscription info, with mint state
+type InscriptionBRC20TickInfo struct {
+	Data   *InscriptionBRC20InfoResp `json:"data"`
+	Tick   string
+	Amount *decimal.Decimal `json:"-"`
+	//ContentBody []byte           `json:"content"`
+	Meta *InscriptionBRC20Data
+
+	Max   *decimal.Decimal `json:"-"`
+	Limit *decimal.Decimal `json:"-"`
+
+	TotalMinted        *decimal.Decimal `json:"-"`
+	ConfirmedMinted    *decimal.Decimal `json:"-"`
+	ConfirmedMinted1h  *decimal.Decimal `json:"-"`
+	ConfirmedMinted24h *decimal.Decimal `json:"-"`
+
+	MintTimes uint32 `json:"-"`
+	Decimal   uint8  `json:"-"`
+
+	TxId   string `json:"-"`
+	Idx    uint32 `json:"-"`
+	Vout   uint32 `json:"-"`
+	Offset uint64 `json:"-"`
+
+	Satoshi  uint64 `json:"-"`
+	PkScript string `json:"-"`
+
+	InscriptionNumber int64  `json:"inscriptionNumber"`
+	CreateIdxKey      string `json:"-"`
+	Height            uint32 `json:"-"`
+	TxIdx             uint32 `json:"-"`
+	BlockTime         uint32 `json:"-"`
+
+	CompleteHeight    uint32 `json:"-"`
+	CompleteBlockTime uint32 `json:"-"`
+
+	InscriptionNumberStart int64 `json:"-"`
+	InscriptionNumberEnd   int64 `json:"-"`
+}
+
+func (in *InscriptionBRC20TickInfo) DeepCopy() (copy *InscriptionBRC20TickInfo) {
+	copy = &InscriptionBRC20TickInfo{
+		Data:    in.Data,
+		Decimal: in.Decimal,
+
+		TxId:   in.TxId,
+		Idx:    in.Idx,
+		Vout:   in.Vout,
+		Offset: in.Offset,
+
+		Satoshi:  in.Satoshi,
+		PkScript: in.PkScript,
+
+		InscriptionNumber: in.InscriptionNumber,
+		CreateIdxKey:      in.CreateIdxKey,
+		Height:            in.Height,
+		TxIdx:             in.TxIdx,
+		BlockTime:         in.BlockTime,
+
+		// runtime value
+		Max:                decimal.NewDecimalCopy(in.Max),
+		Limit:              decimal.NewDecimalCopy(in.Limit),
+		TotalMinted:        decimal.NewDecimalCopy(in.TotalMinted),
+		ConfirmedMinted:    decimal.NewDecimalCopy(in.ConfirmedMinted),
+		ConfirmedMinted1h:  decimal.NewDecimalCopy(in.ConfirmedMinted1h),
+		ConfirmedMinted24h: decimal.NewDecimalCopy(in.ConfirmedMinted24h),
+		Amount:             decimal.NewDecimalCopy(in.Amount),
+
+		MintTimes: in.MintTimes,
+
+		CompleteHeight:    in.CompleteHeight,
+		CompleteBlockTime: in.CompleteBlockTime,
+
+		InscriptionNumberStart: in.InscriptionNumberStart,
+		InscriptionNumberEnd:   in.InscriptionNumberEnd,
+	}
+	return copy
+}
+
+func NewInscriptionBRC20TickInfo(tick, operation string, data *InscriptionBRC20Data) *InscriptionBRC20TickInfo {
+	info := &InscriptionBRC20TickInfo{
+		Data: &InscriptionBRC20InfoResp{
+			BRC20Tick: tick,
+			Operation: operation,
+		},
+		Decimal: 18,
+
+		TxId:   data.TxId,
+		Idx:    data.Idx,
+		Vout:   data.Vout,
+		Offset: data.Offset,
+
+		Satoshi:  data.Satoshi,
+		PkScript: data.PkScript,
+
+		InscriptionNumber: data.InscriptionNumber,
+		CreateIdxKey:      data.CreateIdxKey,
+		Height:            data.Height,
+		TxIdx:             data.TxIdx,
+		BlockTime:         data.BlockTime,
+	}
+	return info
+}
+
+// all history for user
+type BRC20UserHistory struct {
+	History []*BRC20History
+}
+
+// state of address for each tick, (balance and history)
 type BRC20TokenBalance struct {
-	Ticker              string
-	PkScript            string
-	OverallBalanceSafe  *decimal.Decimal
-	OverallBalance      *decimal.Decimal
-	TransferableBalance *decimal.Decimal
-	InvalidTransferList []*InscriptionBRC20TickTransferInfo
-	ValidTransferMap    map[string]*InscriptionBRC20TickTransferInfo
+	Ticker               string
+	PkScript             string
+	AvailableBalance     *decimal.Decimal
+	AvailableBalanceSafe *decimal.Decimal
+	TransferableBalance  *decimal.Decimal
+	ValidTransferMap     map[string]*InscriptionBRC20TickInfo
 
 	History                 []*BRC20History
 	HistoryMint             []*BRC20History
@@ -110,67 +298,48 @@ type BRC20TokenBalance struct {
 	HistorySend             []*BRC20History
 	HistoryReceive          []*BRC20History
 }
-type BRC20History struct {
-	Type        uint8 // inscribe-deploy/inscribe-mint/inscribe-transfer/transfer/send/receive
-	Valid       bool
-	Inscription InscriptionBRC20TickInfoResp
 
-	TxId string
-	Idx  uint32
-	Vout uint32
-
-	PkScriptFrom string
-	PkScriptTo   string
-	Satoshi      uint64
-
-	Amount              string
-	OverallBalance      string
-	TransferableBalance string
-	AvailableBalance    string
-
-	Height    uint32
-	TxIdx     uint32
-	BlockTime uint32
+func (bal *BRC20TokenBalance) OverallBalance() *decimal.Decimal {
+	return bal.AvailableBalance.Add(bal.TransferableBalance)
 }
 
-func NewBRC20History(historyType uint8, isValid bool, isTransfer bool,
-	info *InscriptionBRC20TickInfo, bal *BRC20TokenBalance, data *InscriptionBRC20Data) *BRC20History {
-	history := &BRC20History{
-		Type:  historyType,
-		Valid: isValid,
-		Inscription: InscriptionBRC20TickInfoResp{
-			Height:            data.Height,
-			InscriptionNumber: info.InscriptionNumber,
-			InscriptionId:     fmt.Sprintf("%si%d", utils.GetReversedStringHex(info.TxId), info.Idx),
-		},
-		Amount:    info.Amount.String(),
-		Height:    data.Height,
-		TxIdx:     data.TxIdx,
-		BlockTime: data.BlockTime,
-	}
-	if isTransfer {
-		history.TxId = data.TxId
-		history.Vout = data.Vout
-		history.Idx = data.Idx
-		history.PkScriptFrom = info.PkScript
-		history.PkScriptTo = data.PkScript
-		history.Satoshi = data.Satoshi
-		if history.Satoshi == 0 {
-			history.PkScriptTo = history.PkScriptFrom
-		}
-
-	} else {
-		history.TxId = info.TxId
-		history.Vout = info.Vout
-		history.Idx = info.Idx
-		history.PkScriptTo = info.PkScript
-		history.Satoshi = info.Satoshi
+func (in *BRC20TokenBalance) DeepCopy() (tb *BRC20TokenBalance) {
+	tb = &BRC20TokenBalance{
+		Ticker:               in.Ticker,
+		PkScript:             in.PkScript,
+		AvailableBalanceSafe: decimal.NewDecimalCopy(in.AvailableBalanceSafe),
+		AvailableBalance:     decimal.NewDecimalCopy(in.AvailableBalance),
+		TransferableBalance:  decimal.NewDecimalCopy(in.TransferableBalance),
 	}
 
-	if bal != nil {
-		history.OverallBalance = bal.OverallBalance.String()
-		history.TransferableBalance = bal.TransferableBalance.String()
-		history.AvailableBalance = bal.OverallBalance.Sub(bal.TransferableBalance).String()
+	tb.ValidTransferMap = make(map[string]*InscriptionBRC20TickInfo, len(in.ValidTransferMap))
+	for k, v := range in.ValidTransferMap {
+		tb.ValidTransferMap[k] = v.DeepCopy()
 	}
-	return history
+
+	tb.History = make([]*BRC20History, len(in.History))
+	copy(tb.History, in.History)
+
+	tb.HistoryMint = make([]*BRC20History, len(in.HistoryMint))
+	copy(tb.HistoryMint, in.HistoryMint)
+
+	tb.HistoryInscribeTransfer = make([]*BRC20History, len(in.HistoryInscribeTransfer))
+	copy(tb.HistoryInscribeTransfer, in.HistoryInscribeTransfer)
+
+	tb.HistorySend = make([]*BRC20History, len(in.HistorySend))
+	copy(tb.HistorySend, in.HistorySend)
+
+	tb.HistoryReceive = make([]*BRC20History, len(in.HistoryReceive))
+	copy(tb.HistoryReceive, in.HistoryReceive)
+	return tb
+}
+
+// history inscription info
+type InscriptionBRC20TickInfoResp struct {
+	Height            uint32                    `json:"-"`
+	Data              *InscriptionBRC20InfoResp `json:"data"`
+	InscriptionNumber int64                     `json:"inscriptionNumber"`
+	InscriptionId     string                    `json:"inscriptionId"`
+	Satoshi           uint64                    `json:"satoshi"`
+	Confirmations     int                       `json:"confirmations"`
 }

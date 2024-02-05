@@ -12,6 +12,7 @@ import (
 
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/unisat-wallet/libbrc20-indexer/constant"
+	"github.com/unisat-wallet/libbrc20-indexer/decimal"
 	"github.com/unisat-wallet/libbrc20-indexer/model"
 	"github.com/unisat-wallet/libbrc20-indexer/utils"
 )
@@ -127,13 +128,8 @@ func DumpTickerInfoMap(fname string,
 	inscriptionsTickerInfoMap map[string]*model.BRC20TokenInfo,
 	userTokensBalanceData map[string]map[string]*model.BRC20TokenBalance,
 	tokenUsersBalanceData map[string]map[string]*model.BRC20TokenBalance,
-	testnet bool,
 ) {
-
 	netParams := &chaincfg.MainNetParams
-	if testnet {
-		netParams = &chaincfg.TestNet3Params
-	}
 
 	file, err := os.OpenFile(fname, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0777)
 	if err != nil {
@@ -185,7 +181,7 @@ func DumpTickerInfoMap(fname string,
 
 			fmt.Fprintf(file, "%s %s %s %s %s -> %s\n",
 				info.Ticker,
-				utils.GetReversedStringHex(h.TxId),
+				utils.HashString([]byte(h.TxId)),
 				constant.BRC20_HISTORY_TYPE_NAMES[h.Type],
 				h.Amount,
 				addressFrom,
@@ -194,16 +190,17 @@ func DumpTickerInfoMap(fname string,
 		}
 
 		// holders
-		var allHolders []string
+		var allHoldersPkScript []string
 		for holder := range tokenUsersBalanceData[ticker] {
-			allHolders = append(allHolders, holder)
+			allHoldersPkScript = append(allHoldersPkScript, holder)
 		}
-		sort.SliceStable(allHolders, func(i, j int) bool {
-			return allHolders[i] < allHolders[j]
+		// sort by holder address
+		sort.SliceStable(allHoldersPkScript, func(i, j int) bool {
+			return allHoldersPkScript[i] < allHoldersPkScript[j]
 		})
 
 		// holders
-		for _, holder := range allHolders {
+		for _, holder := range allHoldersPkScript {
 			balanceData := tokenUsersBalanceData[ticker][holder]
 
 			address, err := utils.GetAddressFromScript([]byte(balanceData.PkScript), netParams)
@@ -215,8 +212,203 @@ func DumpTickerInfoMap(fname string,
 				address,
 				len(balanceData.History),
 				len(balanceData.ValidTransferMap),
-				balanceData.OverallBalance.String(),
+				balanceData.AvailableBalance.Add(balanceData.TransferableBalance).String(),
+				len(userTokensBalanceData[holder]),
+			)
+		}
+	}
+}
+
+func DumpModuleInfoMap(fname string,
+	modulesInfoMap map[string]*model.BRC20ModuleSwapInfo) {
+	file, err := os.OpenFile(fname, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0777)
+	if err != nil {
+		log.Fatalf("open module dump file failed, %s", err)
+		return
+	}
+	defer file.Close()
+
+	var allModules []string
+	for moduleId := range modulesInfoMap {
+		allModules = append(allModules, moduleId)
+	}
+	sort.SliceStable(allModules, func(i, j int) bool {
+		return allModules[i] < allModules[j]
+	})
+
+	for _, moduleId := range allModules {
+		info := modulesInfoMap[moduleId]
+		nValid := 0
+		for _, h := range info.History {
+			if h.Valid {
+				nValid++
+			}
+		}
+
+		fmt.Fprintf(file, "module %s(%s) nHistory: %d, nValidHistory: %d, nCommit: %d, nTickers: %d, nHolders: %d, swap: %d, lpholders: %d\n",
+			info.Name,
+			info.ID,
+			len(info.History),
+			nValid,
+			len(info.CommitIdChainMap),
+			len(info.TokenUsersBalanceDataMap),
+			len(info.UsersTokenBalanceDataMap),
+
+			len(info.LPTokenUsersBalanceMap),
+			len(info.UsersLPTokenBalanceMap),
+		)
+
+		DumpModuleTickInfoMap(file, info.ConditionalApproveStateBalanceDataMap, info.TokenUsersBalanceDataMap, info.UsersTokenBalanceDataMap)
+
+		DumpModuleSwapInfoMap(file, info.SwapPoolTotalBalanceDataMap, info.LPTokenUsersBalanceMap, info.UsersLPTokenBalanceMap)
+	}
+}
+
+func DumpModuleTickInfoMap(file *os.File, condStateBalanceDataMap map[string]*model.BRC20ModuleConditionalApproveStateBalance,
+	inscriptionsTickerInfoMap, userTokensBalanceData map[string]map[string]*model.BRC20ModuleTokenBalance,
+) {
+	netParams := constant.GlobalNetParams
+
+	var allTickers []string
+	for ticker := range inscriptionsTickerInfoMap {
+		allTickers = append(allTickers, ticker)
+	}
+	sort.SliceStable(allTickers, func(i, j int) bool {
+		return allTickers[i] < allTickers[j]
+	})
+
+	for _, ticker := range allTickers {
+		holdersMap := inscriptionsTickerInfoMap[ticker]
+
+		nHistory := 0
+		nValid := 0
+
+		var allHoldersPkScript []string
+		for holder, data := range holdersMap {
+			nHistory += len(data.History)
+			for _, h := range data.History {
+				if h.Valid {
+					nValid++
+				}
+			}
+			allHoldersPkScript = append(allHoldersPkScript, holder)
+		}
+		sort.SliceStable(allHoldersPkScript, func(i, j int) bool {
+			return allHoldersPkScript[i] < allHoldersPkScript[j]
+		})
+
+		fmt.Fprintf(file, " %s nHistory: %d, valid: %d, nHolders: %d\n",
+			ticker,
+			nHistory,
+			nValid,
+			// TokenTotalBalance[tick], // fixme
+			len(holdersMap),
+		)
+
+		// holders
+		for _, holder := range allHoldersPkScript {
+			balanceData := holdersMap[holder]
+
+			address, err := utils.GetAddressFromScript([]byte(balanceData.PkScript), netParams)
+			if err != nil {
+				address = hex.EncodeToString([]byte(balanceData.PkScript))
+			}
+			fmt.Fprintf(file, "  %s %s nHistory: %d, bnModule: %s, bnAvai: %s, bnSwap: %s, bnCond: %s, nToken: %d",
+				ticker,
+				address,
+				len(balanceData.History),
+				balanceData.ModuleBalance().String(),
+				balanceData.AvailableBalance.String(),
+				balanceData.SwapAccountBalance.String(),
+				balanceData.CondApproveableBalance.String(),
 				len(userTokensBalanceData[string(balanceData.PkScript)]),
+			)
+
+			if len(balanceData.ValidApproveMap) > 0 {
+				fmt.Fprintf(file, ", nApprove: %d", len(balanceData.ValidApproveMap))
+			}
+			if len(balanceData.ValidWithdrawMap) > 0 {
+				fmt.Fprintf(file, ", nWithdraw: %d", len(balanceData.ValidWithdrawMap))
+			}
+			fmt.Fprintf(file, "\n")
+		}
+	}
+
+	fmt.Fprintf(file, "\n")
+
+	// condStateBalanceDataMap
+	for _, ticker := range allTickers {
+		stateBalance, ok := condStateBalanceDataMap[ticker]
+		if !ok {
+			fmt.Fprintf(file, "  module deposit/withdraw state: %s - \n", ticker)
+			continue
+		}
+
+		fmt.Fprintf(file, "  module deposit/withdraw state: %s deposit: %s, match: %s, new: %s, cancel: %s, wait: %s\n",
+			ticker,
+			stateBalance.BalanceDeposite.String(),
+			stateBalance.BalanceApprove.String(),
+			stateBalance.BalanceNewApprove.String(),
+			stateBalance.BalanceCancelApprove.String(),
+
+			stateBalance.BalanceNewApprove.Sub(
+				stateBalance.BalanceApprove).Sub(
+				stateBalance.BalanceCancelApprove).String(),
+		)
+	}
+
+	fmt.Fprintf(file, "\n")
+}
+
+func DumpModuleSwapInfoMap(file *os.File,
+	swapPoolTotalBalanceDataMap map[string]*model.BRC20ModulePoolTotalBalance,
+	inscriptionsTickerInfoMap, userTokensBalanceData map[string]map[string]*decimal.Decimal) {
+
+	var allTickers []string
+	for ticker := range inscriptionsTickerInfoMap {
+		allTickers = append(allTickers, ticker)
+	}
+	sort.SliceStable(allTickers, func(i, j int) bool {
+		return allTickers[i] < allTickers[j]
+	})
+
+	for _, ticker := range allTickers {
+		holdersMap := inscriptionsTickerInfoMap[ticker]
+
+		var allHoldersPkScript []string
+		for holder := range holdersMap {
+			allHoldersPkScript = append(allHoldersPkScript, holder)
+		}
+		sort.SliceStable(allHoldersPkScript, func(i, j int) bool {
+			return allHoldersPkScript[i] < allHoldersPkScript[j]
+		})
+
+		swap := swapPoolTotalBalanceDataMap[ticker]
+
+		fmt.Fprintf(file, " pool: %s nHistory: %d, nLPholders: %d, lp: %s, %s: %s, %s: %s\n",
+			ticker,
+			len(swap.History),
+			len(holdersMap),
+			swap.LpBalance,
+			swap.Tick[0],
+			swap.TickBalance[0],
+			swap.Tick[1],
+			swap.TickBalance[1],
+		)
+
+		// holders
+		for _, holder := range allHoldersPkScript {
+			balanceData := holdersMap[holder]
+
+			address, err := utils.GetAddressFromScript([]byte(holder), constant.GlobalNetParams)
+			if err != nil {
+				address = hex.EncodeToString([]byte(holder))
+			}
+			fmt.Fprintf(file, "  pool: %s %s lp: %s, swaps: %d\n",
+				ticker,
+				address,
+				balanceData.String(),
+				len(userTokensBalanceData[holder]),
 			)
 		}
 	}

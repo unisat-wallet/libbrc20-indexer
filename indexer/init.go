@@ -1,26 +1,83 @@
 package indexer
 
 import (
-	"bytes"
 	"log"
+	"strings"
 
-	"github.com/unisat-wallet/libbrc20-indexer/constant"
+	"github.com/unisat-wallet/libbrc20-indexer/decimal"
 	"github.com/unisat-wallet/libbrc20-indexer/model"
 )
 
-type BRC20Indexer struct {
+type BRC20ModuleIndexer struct {
+	// brc20 base
+	AllHistory     []*model.BRC20History
+	UserAllHistory map[string]*model.BRC20UserHistory
+
 	InscriptionsTickerInfoMap     map[string]*model.BRC20TokenInfo
 	UserTokensBalanceData         map[string]map[string]*model.BRC20TokenBalance
 	TokenUsersBalanceData         map[string]map[string]*model.BRC20TokenBalance
-	InscriptionsValidBRC20DataMap map[string]*model.InscriptionBRC20TickInfo
+	InscriptionsValidBRC20DataMap map[string]*model.InscriptionBRC20InfoResp
 
 	// inner valid transfer
-	InscriptionsValidTransferMap map[string]*model.InscriptionBRC20TickTransferInfo
+	InscriptionsValidTransferMap map[string]*model.InscriptionBRC20TickInfo
 	// inner invalid transfer
-	InscriptionsInvalidTransferMap map[string]*model.InscriptionBRC20TickTransferInfo
+	InscriptionsInvalidTransferMap map[string]*model.InscriptionBRC20TickInfo
+
+	// module
+	// all modules info
+	ModulesInfoMap map[string]*model.BRC20ModuleSwapInfo
+
+	// module of users [address]moduleid
+	UsersModuleWithTokenMap map[string]string
+
+	// module lp of users [address]moduleid
+	UsersModuleWithLpTokenMap map[string]string
+
+	// runtime for approve
+	InscriptionsValidApproveMap   map[string]*model.InscriptionBRC20SwapInfo // inner valid approve
+	InscriptionsInvalidApproveMap map[string]*model.InscriptionBRC20SwapInfo
+
+	// runtime for conditional approve
+	InscriptionsValidConditionalApproveMap   map[string]*model.InscriptionBRC20SwapConditionalApproveInfo
+	InscriptionsInvalidConditionalApproveMap map[string]*model.InscriptionBRC20SwapConditionalApproveInfo
+
+	// runtime for commit
+	InscriptionsValidCommitMap   map[string]*model.InscriptionBRC20Data // inner valid commit by key
+	InscriptionsInvalidCommitMap map[string]*model.InscriptionBRC20Data
+
+	InscriptionsValidCommitMapById map[string]*model.InscriptionBRC20Data // inner valid commit by id
+
+	// for gen approve event
+	ThisTxId                                    string
+	TxStaticTransferStatesForConditionalApprove []*model.TransferStateForConditionalApprove
 }
 
-func (g *BRC20Indexer) initBRC20() {
+func (g *BRC20ModuleIndexer) GetBRC20HistoryByUser(pkScript string) (userHistory *model.BRC20UserHistory) {
+	if history, ok := g.UserAllHistory[pkScript]; !ok {
+		userHistory = &model.BRC20UserHistory{}
+		g.UserAllHistory[pkScript] = userHistory
+	} else {
+		userHistory = history
+	}
+	return userHistory
+}
+
+func (g *BRC20ModuleIndexer) GetBRC20HistoryByUserForAPI(pkScript string) (userHistory *model.BRC20UserHistory) {
+	if history, ok := g.UserAllHistory[pkScript]; !ok {
+		userHistory = &model.BRC20UserHistory{}
+	} else {
+		userHistory = history
+	}
+	return userHistory
+}
+
+func (g *BRC20ModuleIndexer) initBRC20() {
+	// all history
+	g.AllHistory = make([]*model.BRC20History, 0)
+
+	// user history
+	g.UserAllHistory = make(map[string]*model.BRC20UserHistory, 0)
+
 	// all ticker info
 	g.InscriptionsTickerInfoMap = make(map[string]*model.BRC20TokenInfo, 0)
 
@@ -31,94 +88,299 @@ func (g *BRC20Indexer) initBRC20() {
 	g.TokenUsersBalanceData = make(map[string]map[string]*model.BRC20TokenBalance, 0)
 
 	// valid brc20 inscriptions
-	g.InscriptionsValidBRC20DataMap = make(map[string]*model.InscriptionBRC20TickInfo, 0)
+	g.InscriptionsValidBRC20DataMap = make(map[string]*model.InscriptionBRC20InfoResp, 0)
 
 	// inner valid transfer
-	g.InscriptionsValidTransferMap = make(map[string]*model.InscriptionBRC20TickTransferInfo, 0)
+	g.InscriptionsValidTransferMap = make(map[string]*model.InscriptionBRC20TickInfo, 0)
 	// inner invalid transfer
-	g.InscriptionsInvalidTransferMap = make(map[string]*model.InscriptionBRC20TickTransferInfo, 0)
+	g.InscriptionsInvalidTransferMap = make(map[string]*model.InscriptionBRC20TickInfo, 0)
 }
 
-func isJson(contentBody []byte) bool {
-	if len(contentBody) < 40 {
-		return false
-	}
+func (g *BRC20ModuleIndexer) initModule() {
+	// all modules info
+	g.ModulesInfoMap = make(map[string]*model.BRC20ModuleSwapInfo, 0)
 
-	content := bytes.TrimSpace(contentBody)
-	if !bytes.HasPrefix(content, []byte("{")) {
-		return false
-	}
-	if !bytes.HasSuffix(content, []byte("}")) {
-		return false
-	}
+	// module of users [address]moduleid
+	g.UsersModuleWithTokenMap = make(map[string]string, 0)
 
-	return true
+	// swap
+	// module of users [address]moduleid
+	g.UsersModuleWithLpTokenMap = make(map[string]string, 0)
+
+	// runtime for approve
+	g.InscriptionsValidApproveMap = make(map[string]*model.InscriptionBRC20SwapInfo, 0)
+	g.InscriptionsInvalidApproveMap = make(map[string]*model.InscriptionBRC20SwapInfo, 0)
+
+	// runtime for conditional approve
+	g.InscriptionsValidConditionalApproveMap = make(map[string]*model.InscriptionBRC20SwapConditionalApproveInfo, 0)
+	g.InscriptionsInvalidConditionalApproveMap = make(map[string]*model.InscriptionBRC20SwapConditionalApproveInfo, 0)
+
+	// runtime for commit
+	g.InscriptionsValidCommitMap = make(map[string]*model.InscriptionBRC20Data, 0) // inner valid commit
+	g.InscriptionsInvalidCommitMap = make(map[string]*model.InscriptionBRC20Data, 0)
+
+	g.InscriptionsValidCommitMapById = make(map[string]*model.InscriptionBRC20Data, 0) // inner valid commit
 }
 
-// ProcessUpdateLatestBRC20
-func (g *BRC20Indexer) ProcessUpdateLatestBRC20(brc20Datas []*model.InscriptionBRC20Data) {
-	totalDataCount := len(brc20Datas)
+func (g *BRC20ModuleIndexer) GenerateApproveEventsByTransfer(inscription, tick, from, to string, amt *decimal.Decimal) (events []*model.ConditionalApproveEvent) {
+	transStateStatic := &model.TransferStateForConditionalApprove{
+		Tick:          tick,
+		From:          from,
+		To:            to,
+		Balance:       decimal.NewDecimalCopy(amt), // maybe no need copy
+		InscriptionId: inscription,
+		Max:           amt.String(),
+	}
+	// First, globally save the transfer status.
+	g.TxStaticTransferStatesForConditionalApprove = append(g.TxStaticTransferStatesForConditionalApprove, transStateStatic)
 
+	// Then process each module one by one.
+	for _, moduleInfo := range g.ModulesInfoMap {
+		if g.ThisTxId != moduleInfo.ThisTxId {
+			// For the first time processing the transfer event within the module, you need to clear the status first.
+			moduleInfo.TransferStatesForConditionalApprove = nil
+			moduleInfo.ApproveStatesForConditionalApprove = nil
+			moduleInfo.ThisTxId = g.ThisTxId
+		}
 
-	g.initBRC20()
-	log.Printf("ProcessUpdateLatestBRC20 update. total %d", len(brc20Datas))
+		// Skip processing the transfer directly when there is no approve status.
+		if len(moduleInfo.ApproveStatesForConditionalApprove) == 0 {
+			continue
+		}
 
-	for idx, data := range brc20Datas {
-		progress := idx * 100 / totalDataCount
+		transState := &model.TransferStateForConditionalApprove{
+			Tick:          tick,
+			From:          from,
+			To:            to,
+			Balance:       decimal.NewDecimalCopy(amt), // maybe no need copy
+			InscriptionId: inscription,
+			Max:           amt.String(),
+		}
 
-		// is sending transfer
-		if data.IsTransfer {
-			// transfer
-			if transferInfo, isInvalid := g.GetTransferInfoByKey(data.CreateIdxKey); transferInfo != nil {
-				g.ProcessTransfer(idx, data, transferInfo, isInvalid)
+		innerEvents := moduleInfo.GenerateApproveEventsByTransfer(transState)
+		events = append(events, innerEvents...)
+	}
+	return events
+}
+
+func (g *BRC20ModuleIndexer) GenerateApproveEventsByApprove(owner string, balance *decimal.Decimal,
+	data *model.InscriptionBRC20Data, approveInfo *model.InscriptionBRC20SwapConditionalApproveInfo) (events []*model.ConditionalApproveEvent) {
+	if moduleInfo, ok := g.ModulesInfoMap[approveInfo.Module]; ok {
+		log.Printf("generate approve event. module: %s", moduleInfo.ID)
+
+		if g.ThisTxId != moduleInfo.ThisTxId {
+			// First appearance, clear status
+			moduleInfo.TransferStatesForConditionalApprove = nil
+			moduleInfo.ApproveStatesForConditionalApprove = nil
+			moduleInfo.ThisTxId = g.ThisTxId
+			log.Printf("generate approve event. init")
+		}
+
+		// First appearance of approve, copy all global transfer events.
+		if len(moduleInfo.ApproveStatesForConditionalApprove) == 0 {
+			moduleInfo.TransferStatesForConditionalApprove = nil
+			for _, s := range g.TxStaticTransferStatesForConditionalApprove {
+				moduleInfo.TransferStatesForConditionalApprove = append(moduleInfo.TransferStatesForConditionalApprove, s)
+			}
+			log.Printf("generate approve event. copy transfer")
+		}
+
+		log.Printf("generate approve event. balance: %s", balance.String())
+		innerEvents := moduleInfo.GenerateApproveEventsByApprove(owner, balance, data, approveInfo)
+		events = append(events, innerEvents...)
+	}
+	return events
+}
+
+func (copyDup *BRC20ModuleIndexer) deepCopyBRC20Data(base *BRC20ModuleIndexer) {
+	// history
+	// for _, h := range base.AllHistory {
+	// 	copyDup.AllHistory = append(copyDup.AllHistory, h)
+	// }
+
+	for k, v := range base.InscriptionsTickerInfoMap {
+		tinfo := &model.BRC20TokenInfo{
+			Ticker: v.Ticker,
+			Deploy: v.Deploy.DeepCopy(),
+		}
+
+		// history
+		tinfo.History = make([]*model.BRC20History, len(v.History))
+		copy(tinfo.History, v.History)
+
+		tinfo.HistoryMint = make([]*model.BRC20History, len(v.HistoryMint))
+		copy(tinfo.HistoryMint, v.HistoryMint)
+
+		tinfo.HistoryInscribeTransfer = make([]*model.BRC20History, len(v.HistoryInscribeTransfer))
+		copy(tinfo.HistoryInscribeTransfer, v.HistoryInscribeTransfer)
+
+		tinfo.HistoryTransfer = make([]*model.BRC20History, len(v.HistoryTransfer))
+		copy(tinfo.HistoryTransfer, v.HistoryTransfer)
+
+		// set info
+		copyDup.InscriptionsTickerInfoMap[k] = tinfo
+	}
+
+	for u, userTokens := range base.UserTokensBalanceData {
+		userTokensCopy := make(map[string]*model.BRC20TokenBalance, 0)
+		copyDup.UserTokensBalanceData[u] = userTokensCopy
+		for uniqueLowerTicker, v := range userTokens {
+			tb := v.DeepCopy()
+			userTokensCopy[uniqueLowerTicker] = tb
+
+			tokenUsers, ok := copyDup.TokenUsersBalanceData[uniqueLowerTicker]
+			if !ok {
+				tokenUsers = make(map[string]*model.BRC20TokenBalance, 0)
+				copyDup.TokenUsersBalanceData[uniqueLowerTicker] = tokenUsers
+			}
+			tokenUsers[u] = tb
+		}
+	}
+
+	for k, v := range base.InscriptionsValidBRC20DataMap {
+		copyDup.InscriptionsValidBRC20DataMap[k] = v
+	}
+
+	// transferInfo
+	for k, v := range base.InscriptionsValidTransferMap {
+		copyDup.InscriptionsValidTransferMap[k] = v
+	}
+
+	log.Printf("deepCopyBRC20Data finish. total: %d", len(base.InscriptionsTickerInfoMap))
+}
+
+func (copyDup *BRC20ModuleIndexer) cherryPickBRC20Data(base *BRC20ModuleIndexer, pickUsersPkScript, pickTokensTick map[string]bool) {
+
+	for lowerTick := range pickTokensTick {
+		v, ok := base.InscriptionsTickerInfoMap[lowerTick]
+		if !ok {
+			continue
+		}
+
+		tinfo := &model.BRC20TokenInfo{
+			Ticker: v.Ticker,
+			Deploy: v.Deploy.DeepCopy(),
+		}
+		copyDup.InscriptionsTickerInfoMap[lowerTick] = tinfo
+	}
+	for u := range pickUsersPkScript {
+		userTokens, ok := base.UserTokensBalanceData[u]
+		if !ok {
+			continue
+		}
+		userTokensCopy := make(map[string]*model.BRC20TokenBalance, 0)
+		for lowerTick := range pickTokensTick {
+			balance, ok := userTokens[lowerTick]
+			if !ok {
 				continue
 			}
-
-			continue
+			userTokensCopy[lowerTick] = balance.DeepCopy()
 		}
-
-		if ok := isJson(data.ContentBody); !ok {
-			continue
-		}
-
-		body := new(model.InscriptionBRC20Content)
-		if err := body.Unmarshal(data.ContentBody); err != nil {
-			continue
-		}
-		data.ContentBody = nil
-
-		// is inscribe deploy/mint/transfer
-		if body.Proto != constant.BRC20_P || len(body.BRC20Tick) != 4 {
-			continue
-		}
-
-		if body.Proto == constant.BRC20_P && body.Operation == constant.BRC20_OP_DEPLOY { // op deploy
-			g.ProcessDeploy(progress, data, body)
-		} else if body.Proto == constant.BRC20_P && body.Operation == constant.BRC20_OP_MINT { // op mint
-			g.ProcessMint(progress, data, body)
-		} else if body.Proto == constant.BRC20_P && body.Operation == constant.BRC20_OP_TRANSFER { // op transfer
-			g.ProcessInscribeTransfer(progress, data, body)
-		} else {
-			continue
-		}
+		copyDup.UserTokensBalanceData[u] = userTokensCopy
 	}
 
-	for _, holdersBalanceMap := range g.TokenUsersBalanceData {
-		for key, balance := range holdersBalanceMap {
-			if balance.OverallBalance.Sign() <= 0 {
-				delete(holdersBalanceMap, key)
+	for u, userTokens := range copyDup.UserTokensBalanceData {
+		for uniqueLowerTicker, balance := range userTokens {
+			tokenUsers, ok := copyDup.TokenUsersBalanceData[uniqueLowerTicker]
+			if !ok {
+				tokenUsers = make(map[string]*model.BRC20TokenBalance, 0)
+				copyDup.TokenUsersBalanceData[uniqueLowerTicker] = tokenUsers
 			}
+			tokenUsers[u] = balance
 		}
 	}
 
-	log.Printf("ProcessUpdateLatestBRC20 finish. ticker: %d, users: %d, tokens: %d, validInscription: %d, validTransfer: %d, invalidTransfer: %d",
-		len(g.InscriptionsTickerInfoMap),
-		len(g.UserTokensBalanceData),
-		len(g.TokenUsersBalanceData),
+	log.Printf("cherryPickBRC20Data finish. total: %d", len(copyDup.InscriptionsTickerInfoMap))
+}
 
-		len(g.InscriptionsValidBRC20DataMap),
+func (copyDup *BRC20ModuleIndexer) deepCopyModuleData(base *BRC20ModuleIndexer) {
 
-		len(g.InscriptionsValidTransferMap),
-		len(g.InscriptionsInvalidTransferMap),
-	)
+	for module, info := range base.ModulesInfoMap {
+		copyDup.ModulesInfoMap[module] = info.DeepCopy()
+	}
+
+	// module of users
+	for k, v := range base.UsersModuleWithTokenMap {
+		copyDup.UsersModuleWithTokenMap[k] = v
+	}
+
+	// module lp of users
+	for k, v := range base.UsersModuleWithLpTokenMap {
+		copyDup.UsersModuleWithLpTokenMap[k] = v
+	}
+
+	// approveInfo
+	for k, v := range base.InscriptionsValidApproveMap {
+		copyDup.InscriptionsValidApproveMap[k] = v
+	}
+	for k, v := range base.InscriptionsInvalidApproveMap {
+		copyDup.InscriptionsInvalidApproveMap[k] = v
+	}
+
+	// conditional approveInfo
+	for k, v := range base.InscriptionsValidConditionalApproveMap {
+		copyDup.InscriptionsValidConditionalApproveMap[k] = v.DeepCopy()
+	}
+	for k, v := range base.InscriptionsInvalidConditionalApproveMap {
+		copyDup.InscriptionsInvalidConditionalApproveMap[k] = v.DeepCopy()
+	}
+
+	// commitInfo
+	for k, v := range base.InscriptionsValidCommitMap {
+		copyDup.InscriptionsValidCommitMap[k] = v
+	}
+	for k, v := range base.InscriptionsInvalidCommitMap {
+		copyDup.InscriptionsInvalidCommitMap[k] = v
+	}
+
+	for k, v := range base.InscriptionsValidCommitMapById {
+		copyDup.InscriptionsValidCommitMapById[k] = v
+	}
+
+	// runtime state
+	copyDup.ThisTxId = base.ThisTxId
+	for _, v := range base.TxStaticTransferStatesForConditionalApprove {
+		copyDup.TxStaticTransferStatesForConditionalApprove = append(copyDup.TxStaticTransferStatesForConditionalApprove, v.DeepCopy())
+	}
+
+	log.Printf("deepCopyModuleData finish. total: %d", len(base.ModulesInfoMap))
+}
+
+func (copyDup *BRC20ModuleIndexer) cherryPickModuleData(base *BRC20ModuleIndexer, module string, pickUsersPkScript, pickTokensTick, pickPoolsPair map[string]bool) {
+
+	info, ok := base.ModulesInfoMap[module]
+	if ok {
+		copyDup.ModulesInfoMap[module] = info.CherryPick(pickUsersPkScript, pickTokensTick, pickPoolsPair)
+	}
+
+	// Data required for verification
+	for k, v := range base.InscriptionsValidCommitMapById {
+		copyDup.InscriptionsValidCommitMapById[k] = v
+	}
+	log.Printf("cherryPickModuleData finish. total: %d", len(base.ModulesInfoMap))
+}
+
+func (base *BRC20ModuleIndexer) DeepCopy() (copyDup *BRC20ModuleIndexer) {
+	copyDup = &BRC20ModuleIndexer{}
+	copyDup.initBRC20()
+	copyDup.initModule()
+
+	copyDup.deepCopyBRC20Data(base)
+	copyDup.deepCopyModuleData(base)
+	return copyDup
+}
+
+func (base *BRC20ModuleIndexer) CherryPick(module string, pickUsersPkScript, pickTokensTick, pickPoolsPair map[string]bool) (copyDup *BRC20ModuleIndexer) {
+	copyDup = &BRC20ModuleIndexer{}
+	copyDup.initBRC20()
+	copyDup.initModule()
+
+	moduleInfo, ok := base.ModulesInfoMap[module]
+	if ok {
+		lowerTick := strings.ToLower(moduleInfo.GasTick)
+		pickTokensTick[lowerTick] = true
+	}
+	copyDup.cherryPickBRC20Data(base, pickUsersPkScript, pickTokensTick)
+	copyDup.cherryPickModuleData(base, module, pickUsersPkScript, pickTokensTick, pickPoolsPair)
+	return copyDup
 }
