@@ -105,8 +105,8 @@ func LoadBRC20InputData(fname string) ([]*model.InscriptionBRC20Data, error) {
 		if err != nil {
 			return nil, err
 		}
-
-		data.CreateIdxKey = string(createIdxKey)
+		data.ContentBody = content
+		data.CreateIdxKey = string(fields[9])
 
 		height, err := strconv.ParseUint(fields[10], 10, 32)
 		if err != nil {
