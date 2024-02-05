@@ -66,11 +66,11 @@ func LoadBRC20InputData(fname string) ([]*model.InscriptionBRC20Data, error) {
 		}
 		data.Vout = uint32(vout)
 
-		offset, err := strconv.ParseUint(fields[4], 10, 32)
+		offset, err := strconv.ParseUint(fields[4], 10, 64)
 		if err != nil {
 			return nil, err
 		}
-		data.Offset = uint32(offset)
+		data.Offset = uint64(offset)
 
 		satoshi, err := strconv.ParseUint(fields[5], 10, 64)
 		if err != nil {
