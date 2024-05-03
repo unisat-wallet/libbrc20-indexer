@@ -163,8 +163,8 @@ func (g *BRC20ModuleIndexer) ProcessTransfer(data *model.InscriptionBRC20Data, t
 	// get user's tokens to update
 
 	moduleTokenBalance := moduleInfo.GetUserTokenBalance(transferInfo.Tick, senderPkScript)
-	// 设置module充值
-	if data.BlockTime > 0 { // 多少个确认ok
+	// set module deposit
+	if data.BlockTime > 0 { // how many confirmes ok
 		moduleTokenBalance.SwapAccountBalanceSafe = moduleTokenBalance.SwapAccountBalanceSafe.Add(transferInfo.Amount)
 	}
 	moduleTokenBalance.SwapAccountBalance = moduleTokenBalance.SwapAccountBalance.Add(transferInfo.Amount)
