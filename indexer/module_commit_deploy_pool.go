@@ -25,12 +25,16 @@ func (g *BRC20ModuleIndexer) ProcessCommitFunctionDeployPool(moduleInfo *model.B
 	// lp token balance of address in module [pool][address]balance
 	moduleInfo.LPTokenUsersBalanceMap[poolPair] = make(map[string]*decimal.Decimal, 0)
 
+	token0Amt, _ := g.CheckTickVerify(token0, "0")
+	token1Amt, _ := g.CheckTickVerify(token1, "0")
+
 	// swap total balance
 	// total balance of pool in module [pool]balanceData
 	moduleInfo.SwapPoolTotalBalanceDataMap[poolPair] = &model.BRC20ModulePoolTotalBalance{
 		Tick:    [2]string{token0, token1},
 		History: make([]*model.BRC20ModuleHistory, 0), // fixme:
 		// balance
+		TickBalance: [2]*decimal.Decimal{token0Amt, token1Amt},
 	}
 	log.Printf("[%s] pool deploy pool [%s]", moduleInfo.ID, poolPair)
 	return nil
