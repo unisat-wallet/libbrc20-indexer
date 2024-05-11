@@ -1,11 +1,5 @@
 package model
 
-import (
-	"fmt"
-
-	"github.com/unisat-wallet/libbrc20-indexer/utils"
-)
-
 // history
 type BRC20ModuleHistory struct {
 	BRC20HistoryBase
@@ -24,7 +18,7 @@ func NewBRC20ModuleHistory(isTransfer bool, historyType uint8, from, to *Inscrip
 			Height:            from.Height,
 			ContentBody:       from.ContentBody, // to.Content is empty on transfer
 			InscriptionNumber: from.InscriptionNumber,
-			InscriptionId:     fmt.Sprintf("%si%d", utils.HashString([]byte(from.TxId)), from.Idx),
+			InscriptionId:     from.GetInscriptionId(),
 		},
 	}
 	if isTransfer {

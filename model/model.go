@@ -214,6 +214,9 @@ type InscriptionBRC20TickInfo struct {
 	InscriptionNumberEnd   int64 `json:"-"`
 }
 
+func (d *InscriptionBRC20TickInfo) GetInscriptionId() string {
+	return fmt.Sprintf("%si%d", utils.HashString([]byte(d.TxId)), d.Idx)
+}
 func (in *InscriptionBRC20TickInfo) DeepCopy() (copy *InscriptionBRC20TickInfo) {
 	copy = &InscriptionBRC20TickInfo{
 		Data:    in.Data,
