@@ -279,7 +279,7 @@ func (g *BRC20ModuleIndexer) ProcessInscribeCommitPreVerify(body *model.Inscript
 			f.PkScript = string(pkScript)
 		}
 
-		log.Printf("ProcessInscribeCommitPreVerify func[%d] %s(%s)", idx, f.Function, strings.Join(f.Params, ", "))
+		// log.Printf("ProcessInscribeCommitPreVerify func[%d] %s(%s)", idx, f.Function, strings.Join(f.Params, ", "))
 
 		// get prevouse function id by user
 		previous := functionsByAddressMap[f.Address]
@@ -516,7 +516,7 @@ func (g *BRC20ModuleIndexer) ProcessCommitVerify(commitId string, body *model.In
 		if gasPriceAmt.Sign() > 0 {
 			size := eachFuntionSize[idx]
 			gasAmt := gasPriceAmt.Mul(decimal.NewDecimal(size, 3))
-			log.Printf("process commit[%d] size: %d, gas fee: %s, module[%s]", idx, size, gasAmt.String(), body.Module)
+			// log.Printf("process commit[%d] size: %d, gas fee: %s, module[%s]", idx, size, gasAmt.String(), body.Module)
 			if err := g.ProcessCommitFunctionGasFee(moduleInfo, f.PkScript, gasAmt); err != nil { // has update
 				log.Printf("process commit[%d] gas failed: %s", idx, err)
 				return idx, true, err

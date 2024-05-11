@@ -31,7 +31,7 @@ func (g *BRC20ModuleIndexer) ProcessCommitFunctionRemoveLiquidity(moduleInfo *mo
 		return errors.New("removeLiq: users balance map missing user")
 	}
 
-	log.Printf("[%s] pool before removeliq [%s] %s: %s, %s: %s, lp: %s", moduleInfo.ID, poolPair, pool.Tick[0], pool.TickBalance[0], pool.Tick[1], pool.TickBalance[1], pool.LpBalance)
+	// log.Printf("[%s] pool before removeliq [%s] %s: %s, %s: %s, lp: %s", moduleInfo.ID, poolPair, pool.Tick[0], pool.TickBalance[0], pool.Tick[1], pool.TickBalance[1], pool.LpBalance)
 	log.Printf("pool removeliq params: %v", f.Params)
 
 	tokenLpAmtStr := f.Params[1]
@@ -137,6 +137,6 @@ func (g *BRC20ModuleIndexer) ProcessCommitFunctionRemoveLiquidity(moduleInfo *mo
 	// update lastRootK
 	pool.LastRootK = pool.TickBalance[token0Idx].Mul(pool.TickBalance[token1Idx]).Sqrt()
 
-	log.Printf("[%s] pool after removeliq [%s] %s: %s, %s: %s, lp: %s", moduleInfo.ID, poolPair, pool.Tick[0], pool.TickBalance[0], pool.Tick[1], pool.TickBalance[1], pool.LpBalance)
+	// log.Printf("[%s] pool after removeliq [%s] %s: %s, %s: %s, lp: %s", moduleInfo.ID, poolPair, pool.Tick[0], pool.TickBalance[0], pool.Tick[1], pool.TickBalance[1], pool.LpBalance)
 	return nil
 }

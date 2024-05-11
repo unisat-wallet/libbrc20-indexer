@@ -20,7 +20,6 @@ import (
 //
 //	amountIn = (reserveIn * amountOut * 1000)/((reserveOut - amountOut) * 997) + 1
 func (g *BRC20ModuleIndexer) ProcessCommitFunctionSwap(moduleInfo *model.BRC20ModuleSwapInfo, f *model.SwapFunctionData) error {
-	log.Printf("ProcessCommitFunctionSwap start")
 	token0, token1, err := utils.DecodeTokensFromSwapPair(f.Params[0])
 	if err != nil {
 		return errors.New("func: swap poolPair invalid")
@@ -39,7 +38,7 @@ func (g *BRC20ModuleIndexer) ProcessCommitFunctionSwap(moduleInfo *model.BRC20Mo
 		return errors.New("func: swap token invalid")
 	}
 
-	log.Printf("[%s] pool before swap [%s] %s: %s, %s: %s, lp: %s", moduleInfo.ID, poolPair, pool.Tick[0], pool.TickBalance[0], pool.Tick[1], pool.TickBalance[1], pool.LpBalance)
+	// log.Printf("[%s] pool before swap [%s] %s: %s, %s: %s, lp: %s", moduleInfo.ID, poolPair, pool.Tick[0], pool.TickBalance[0], pool.Tick[1], pool.TickBalance[1], pool.LpBalance)
 	log.Printf("pool swap params: %v", f.Params)
 
 	var tokenIn, tokenInAmtStr, tokenOut, tokenOutAmtStr string
@@ -149,6 +148,6 @@ func (g *BRC20ModuleIndexer) ProcessCommitFunctionSwap(moduleInfo *model.BRC20Mo
 	pool.TickBalance[tokenInIdx] = pool.TickBalance[tokenInIdx].Add(amountIn)
 	tokenOutBalance.SwapAccountBalance = tokenOutBalance.SwapAccountBalance.Add(amountOut)
 
-	log.Printf("[%s] pool after swap [%s] %s: %s, %s: %s, lp: %s", moduleInfo.ID, poolPair, pool.Tick[0], pool.TickBalance[0], pool.Tick[1], pool.TickBalance[1], pool.LpBalance)
+	// log.Printf("[%s] pool after swap [%s] %s: %s, %s: %s, lp: %s", moduleInfo.ID, poolPair, pool.Tick[0], pool.TickBalance[0], pool.Tick[1], pool.TickBalance[1], pool.LpBalance)
 	return nil
 }

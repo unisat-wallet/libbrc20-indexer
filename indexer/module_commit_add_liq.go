@@ -27,7 +27,7 @@ func (g *BRC20ModuleIndexer) ProcessCommitFunctionAddLiquidity(moduleInfo *model
 		return errors.New("addLiq: users invalid")
 	}
 
-	log.Printf("[%s] pool before addliq [%s] %s: %s, %s: %s, lp: %s", moduleInfo.ID, poolPair, pool.Tick[0], pool.TickBalance[0], pool.Tick[1], pool.TickBalance[1], pool.LpBalance)
+	// log.Printf("[%s] pool before addliq [%s] %s: %s, %s: %s, lp: %s", moduleInfo.ID, poolPair, pool.Tick[0], pool.TickBalance[0], pool.Tick[1], pool.TickBalance[1], pool.LpBalance)
 	log.Printf("pool addliq params: %v", f.Params)
 
 	token0AmtStr := f.Params[1]
@@ -172,6 +172,6 @@ func (g *BRC20ModuleIndexer) ProcessCommitFunctionAddLiquidity(moduleInfo *model
 	// update lastRootK
 	pool.LastRootK = pool.TickBalance[token0Idx].Mul(pool.TickBalance[token1Idx]).Sqrt()
 
-	log.Printf("[%s] pool after addliq [%s] %s: %s, %s: %s, lp: %s", moduleInfo.ID, poolPair, pool.Tick[0], pool.TickBalance[0], pool.Tick[1], pool.TickBalance[1], pool.LpBalance)
+	// log.Printf("[%s] pool after addliq [%s] %s: %s, %s: %s, lp: %s", moduleInfo.ID, poolPair, pool.Tick[0], pool.TickBalance[0], pool.Tick[1], pool.TickBalance[1], pool.LpBalance)
 	return nil
 }
