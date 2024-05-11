@@ -266,11 +266,11 @@ func (m *BRC20ModuleSwapInfo) DeepCopy() (copy *BRC20ModuleSwapInfo) {
 		TokenUsersBalanceDataMap: make(map[string]map[string]*BRC20ModuleTokenBalance, 0),
 
 		// swap
-		// lp token of users in module [address][pair]balance
-		UsersLPTokenBalanceMap: make(map[string]map[string]*decimal.Decimal, 0),
-
 		// lp token balance of address in module [pair][address]balance
 		LPTokenUsersBalanceMap: make(map[string]map[string]*decimal.Decimal, 0),
+
+		// lp token of users in module [address][pair]balance
+		UsersLPTokenBalanceMap: make(map[string]map[string]*decimal.Decimal, 0),
 
 		// swap total balance
 		// total balance of pool in module [pair]balanceData
@@ -376,11 +376,11 @@ func (m *BRC20ModuleSwapInfo) CherryPick(pickUsersPkScript, pickTokensTick, pick
 		TokenUsersBalanceDataMap: make(map[string]map[string]*BRC20ModuleTokenBalance, 0),
 
 		// swap
-		// lp token of users in module [address][pair]balance
-		UsersLPTokenBalanceMap: make(map[string]map[string]*decimal.Decimal, 0),
-
 		// lp token balance of address in module [pair][address]balance
 		LPTokenUsersBalanceMap: make(map[string]map[string]*decimal.Decimal, 0),
+
+		// lp token of users in module [address][pair]balance
+		UsersLPTokenBalanceMap: make(map[string]map[string]*decimal.Decimal, 0),
 
 		// swap total balance
 		// total balance of pool in module [pair]balanceData

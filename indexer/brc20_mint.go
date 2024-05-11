@@ -52,13 +52,12 @@ func (g *BRC20ModuleIndexer) ProcessMint(data *model.InscriptionBRC20Data) error
 	if token, ok := userTokens[uniqueLowerTicker]; !ok {
 		tokenBalance = &model.BRC20TokenBalance{Ticker: tokenInfo.Ticker, PkScript: data.PkScript}
 		userTokens[uniqueLowerTicker] = tokenBalance
-
-		// init token's users
-		tokenUsers := g.TokenUsersBalanceData[uniqueLowerTicker]
-		tokenUsers[string(data.PkScript)] = tokenBalance
 	} else {
 		tokenBalance = token
 	}
+	// init token's users
+	tokenUsers := g.TokenUsersBalanceData[uniqueLowerTicker]
+	tokenUsers[string(data.PkScript)] = tokenBalance
 
 	body.BRC20Tick = tokenInfo.Ticker
 	mintInfo := model.NewInscriptionBRC20TickInfo(body.BRC20Tick, body.Operation, data)
