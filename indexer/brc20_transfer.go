@@ -204,7 +204,8 @@ func (g *BRC20ModuleIndexer) ProcessInscribeTransfer(data *model.InscriptionBRC2
 	// check amount
 	amt, err := decimal.NewDecimalFromString(body.BRC20Amount, int(tinfo.Decimal))
 	if err != nil {
-		return errors.New("transfer, but invalid amount")
+		return nil
+		// return errors.New("transfer, but invalid amount")
 	}
 	if amt.Sign() <= 0 || amt.Cmp(tinfo.Max) > 0 {
 		return nil
