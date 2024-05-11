@@ -65,7 +65,7 @@ func (g *BRC20ModuleIndexer) ProcessApprove(data *model.InscriptionBRC20Data, ap
 		return errors.New("approve, send from ticker missing")
 	}
 
-	// Cross-check to approve whether the inscription exists.
+	// Cross-check whether the approve-inscription exists.
 	if _, ok := fromTokenBalance.ValidApproveMap[data.CreateIdxKey]; !ok {
 		log.Printf("ProcessBRC20Approve send from approve missing(dup approve?). height: %d, txidx: %d",
 			data.Height,

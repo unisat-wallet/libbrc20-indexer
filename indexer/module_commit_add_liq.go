@@ -150,7 +150,7 @@ func (g *BRC20ModuleIndexer) ProcessCommitFunctionAddLiquidity(moduleInfo *model
 	}
 	lpsBalance[poolPair] = lpbalance
 
-	// zeor address lp balance update
+	// zero address lp balance update
 	if first {
 		zerolpbalance := usersLpBalanceInPool[constant.ZERO_ADDRESS_PKSCRIPT]
 		zerolpbalance = zerolpbalance.Add(decimal.NewDecimal(1000, 18))

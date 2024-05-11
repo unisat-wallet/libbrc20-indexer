@@ -187,6 +187,7 @@ func GetEachItemLengthOfCommitJsonData(body []byte) (results []uint64, err error
 
 	for {
 		tok, err := decoder.Token()
+		// Return the next unprocessed token.
 		if err == io.EOF {
 			break
 		} else if err != nil {
@@ -196,12 +197,14 @@ func GetEachItemLengthOfCommitJsonData(body []byte) (results []uint64, err error
 		offset := decoder.InputOffset()
 
 		switch tok := tok.(type) {
+		// Based on the token type, appropriate processing is performed.
 		case json.Delim:
 
 			switch tok {
 			case '{':
 
 				if indentLevel == 2 && readyDataProcess && startDataProcess {
+					// Step 3: Record start offset at '{' character.
 					lastPos = uint64(offset)
 				}
 
@@ -212,6 +215,7 @@ func GetEachItemLengthOfCommitJsonData(body []byte) (results []uint64, err error
 			case '}':
 
 				if indentLevel == 3 && readyDataProcess && startDataProcess {
+					// Step 4: Record length at '}' character.
 					results = append(results, uint64(offset)-lastPos+1)
 				}
 
@@ -224,6 +228,7 @@ func GetEachItemLengthOfCommitJsonData(body []byte) (results []uint64, err error
 			case '[':
 
 				if indentLevel == 1 && readyDataProcess && !startDataProcess {
+					// Step 2: Start formally counting after '['.
 					results = nil
 					startDataProcess = true
 				}
@@ -235,6 +240,7 @@ func GetEachItemLengthOfCommitJsonData(body []byte) (results []uint64, err error
 			case ']':
 
 				if indentLevel == 2 && readyDataProcess && startDataProcess {
+					// Step 5: End the statistics after ']'.
 					readyDataProcess = false
 					startDataProcess = false
 				}
@@ -255,10 +261,12 @@ func GetEachItemLengthOfCommitJsonData(body []byte) (results []uint64, err error
 
 					if indentLevel == 1 {
 						if tok == "data" {
+							// Step 1: Mark the data start, and initialize the marker and result variables.
 							results = nil
 							readyDataProcess = true
 							startDataProcess = false
 						} else {
+							// Step 6: Mark complete.
 							readyDataProcess = false
 							startDataProcess = false
 						}

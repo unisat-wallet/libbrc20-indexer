@@ -80,7 +80,7 @@ func (g *BRC20ModuleIndexer) ProcessCommitFunctionSwap(moduleInfo *model.BRC20Mo
 
 	// Please note that should use integer calculations here.
 	// support exactIn
-	//
+	// Slippage check
 	// exactIn:  1/(1+slippage) * quoteAmount
 	// exactOut:  (1+slippage) * quoteAmount
 	slippageAmtStr := f.Params[5]
