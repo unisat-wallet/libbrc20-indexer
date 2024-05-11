@@ -3,12 +3,12 @@ package indexer
 import (
 	"errors"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/unisat-wallet/libbrc20-indexer/constant"
 	"github.com/unisat-wallet/libbrc20-indexer/decimal"
 	"github.com/unisat-wallet/libbrc20-indexer/model"
+	"github.com/unisat-wallet/libbrc20-indexer/utils"
 )
 
 func (g *BRC20ModuleIndexer) ProcessMint(data *model.InscriptionBRC20Data) error {
@@ -18,17 +18,22 @@ func (g *BRC20ModuleIndexer) ProcessMint(data *model.InscriptionBRC20Data) error
 	}
 
 	// check tick
-	if len(body.BRC20Tick) != 4 {
+	uniqueLowerTicker, err := utils.GetValidUniqueLowerTickerTicker(body.BRC20Tick)
+	if err != nil {
 		return nil
-		// return errors.New("mint, tick length not 4")
+		// return errors.New("mint, tick length not 4 or 5")
 	}
-	uniqueLowerTicker := strings.ToLower(body.BRC20Tick)
 	tokenInfo, ok := g.InscriptionsTickerInfoMap[uniqueLowerTicker]
 	if !ok {
 		return nil
 		// return errors.New(fmt.Sprintf("mint %s, but tick not exist", body.BRC20Tick))
 	}
 	tinfo := tokenInfo.Deploy
+	if tinfo.SelfMint {
+		if utils.DecodeInscriptionFromBin(data.Parent) != tinfo.GetInscriptionId() {
+			return errors.New(fmt.Sprintf("self mint %s, but parent invalid", body.BRC20Tick))
+		}
+	}
 
 	// check mint amount
 	amt, err := decimal.NewDecimalFromString(body.BRC20Amount, int(tinfo.Decimal))

@@ -4,11 +4,11 @@ import (
 	"errors"
 	"log"
 	"strconv"
-	"strings"
 
 	"github.com/unisat-wallet/libbrc20-indexer/constant"
 	"github.com/unisat-wallet/libbrc20-indexer/decimal"
 	"github.com/unisat-wallet/libbrc20-indexer/model"
+	"github.com/unisat-wallet/libbrc20-indexer/utils"
 )
 
 func (g *BRC20ModuleIndexer) ProcessDeploy(data *model.InscriptionBRC20Data) error {
@@ -17,12 +17,22 @@ func (g *BRC20ModuleIndexer) ProcessDeploy(data *model.InscriptionBRC20Data) err
 		return nil
 	}
 
-	// check tick/amt
-	if len(body.BRC20Tick) != 4 {
+	// check tick
+	uniqueLowerTicker, err := utils.GetValidUniqueLowerTickerTicker(body.BRC20Tick)
+	if err != nil {
 		return nil
-		// return errors.New("deploy, tick length not 4")
+		// return errors.New("deploy, tick length not 4 or 5")
 	}
-	uniqueLowerTicker := strings.ToLower(body.BRC20Tick)
+	if len(body.BRC20Tick) == 5 {
+		if body.BRC20SelfMint != "true" {
+			return nil
+			// return errors.New("deploy, tick length 5, but not self_mint")
+		}
+		if data.Height < g.EnableSelfMintHeight {
+			return nil
+			// return errors.New("deploy, tick length 5, but not enabled")
+		}
+	}
 	if _, ok := g.InscriptionsTickerInfoMap[uniqueLowerTicker]; ok { // dup ticker
 		return nil
 		// return errors.New("deploy, but tick exist")
@@ -40,6 +50,10 @@ func (g *BRC20ModuleIndexer) ProcessDeploy(data *model.InscriptionBRC20Data) err
 	tinfo.Data.BRC20Decimal = body.BRC20Decimal
 	tinfo.Data.BRC20Minted = "0"
 	tinfo.InscriptionNumberStart = data.InscriptionNumber
+	if len(body.BRC20Tick) == 5 && body.BRC20SelfMint == "true" {
+		tinfo.SelfMint = true
+		tinfo.Data.BRC20SelfMint = "true"
+	}
 
 	// dec
 	if dec, err := strconv.ParseUint(tinfo.Data.BRC20Decimal, 10, 64); err != nil || dec > 18 {
@@ -62,10 +76,19 @@ func (g *BRC20ModuleIndexer) ProcessDeploy(data *model.InscriptionBRC20Data) err
 		)
 		return errors.New("deploy, but max invalid")
 	} else {
-		if max.Sign() <= 0 || max.IsOverflowUint64() {
-			return errors.New("deploy, but max invalid (range)")
+		if max.Sign() < 0 || max.IsOverflowUint64() {
+			return nil
+			// return errors.New("deploy, but max invalid (range)")
 		}
-		tinfo.Max = max
+		if max.Sign() == 0 {
+			if tinfo.SelfMint {
+				tinfo.Max = max.GetMaxUint64()
+			} else {
+				return errors.New("deploy, but max invalid (0)")
+			}
+		} else {
+			tinfo.Max = max
+		}
 	}
 
 	// lim
@@ -77,10 +100,18 @@ func (g *BRC20ModuleIndexer) ProcessDeploy(data *model.InscriptionBRC20Data) err
 		)
 		return errors.New("deploy, but lim invalid")
 	} else {
-		if lim.Sign() <= 0 || lim.IsOverflowUint64() {
+		if lim.Sign() < 0 || lim.IsOverflowUint64() {
 			return errors.New("deploy, but lim invalid (range)")
 		}
-		tinfo.Limit = lim
+		if lim.Sign() == 0 {
+			if tinfo.SelfMint {
+				tinfo.Limit = lim.GetMaxUint64()
+			} else {
+				return errors.New("deploy, but lim invalid (0)")
+			}
+		} else {
+			tinfo.Limit = lim
+		}
 	}
 
 	tokenInfo := &model.BRC20TokenInfo{Ticker: body.BRC20Tick, Deploy: tinfo}

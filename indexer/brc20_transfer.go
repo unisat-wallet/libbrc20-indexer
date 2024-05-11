@@ -130,6 +130,12 @@ func (g *BRC20ModuleIndexer) ProcessTransfer(data *model.InscriptionBRC20Data, t
 	tokenBalance.HistoryReceive = append(tokenBalance.HistoryReceive, toHistory)
 
 	////////////////////////////////////////////////////////////////
+	// skip module deposit if self mint for now
+	if tokenInfo.Deploy.SelfMint {
+		return nil
+	}
+
+	////////////////////////////////////////////////////////////////
 	// module conditional approve (black withdraw)
 	if g.ThisTxId != data.TxId {
 		g.TxStaticTransferStatesForConditionalApprove = nil
@@ -182,11 +188,12 @@ func (g *BRC20ModuleIndexer) ProcessInscribeTransfer(data *model.InscriptionBRC2
 	}
 
 	// check tick
-	if len(body.BRC20Tick) != 4 {
+	uniqueLowerTicker, err := utils.GetValidUniqueLowerTickerTicker(body.BRC20Tick)
+	if err != nil {
 		return nil
-		// return errors.New("transfer, tick length not 4")
+		// return errors.New("transfer, tick length not 4 or 5")
 	}
-	uniqueLowerTicker := strings.ToLower(body.BRC20Tick)
+
 	tokenInfo, ok := g.InscriptionsTickerInfoMap[uniqueLowerTicker]
 	if !ok {
 		return nil

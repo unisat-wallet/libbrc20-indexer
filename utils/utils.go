@@ -24,6 +24,13 @@ func DecodeTokensFromSwapPair(tickPair string) (token0, token1 string, err error
 
 	return token0, token1, nil
 }
+func GetValidUniqueLowerTickerTicker(ticker string) (lowerTicker string, err error) {
+	if len(ticker) != 4 && len(ticker) != 5 {
+		return "", errors.New("ticker len invalid")
+	}
+	lowerTicker = strings.ToLower(ticker)
+	return lowerTicker, nil
+}
 
 // single sha256 hash
 func GetSha256(data []byte) (hash []byte) {
@@ -145,4 +152,24 @@ func GetModuleFromScript(script []byte) (module string, ok bool) {
 
 	module = fmt.Sprintf("%si%d", HashString(script[2:34]), idx)
 	return module, true
+}
+func DecodeInscriptionFromBin(script []byte) (id string) {
+	n := len(script)
+	if n < 32 || n > 36 {
+		return ""
+	}
+	var idx uint32
+	if n == 32 {
+		idx = uint32(0)
+	} else if n <= 33 {
+		idx = uint32(script[32])
+	} else if n <= 34 {
+		idx = uint32(binary.LittleEndian.Uint16(script[32:34]))
+	} else if n <= 35 {
+		idx = uint32(script[32]) | uint32(script[33])<<8 | uint32(script[34])<<16
+	} else if n <= 36 {
+		idx = binary.LittleEndian.Uint32(script[32:36])
+	}
+	id = fmt.Sprintf("%si%d", HashString(script[:32]), idx)
+	return id
 }

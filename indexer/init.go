@@ -9,6 +9,7 @@ import (
 )
 
 type BRC20ModuleIndexer struct {
+	EnableSelfMintHeight uint32
 	// brc20 base
 	AllHistory     []*model.BRC20History
 	UserAllHistory map[string]*model.BRC20UserHistory
@@ -194,6 +195,7 @@ func (g *BRC20ModuleIndexer) GenerateApproveEventsByApprove(owner string, balanc
 
 func (copyDup *BRC20ModuleIndexer) deepCopyBRC20Data(base *BRC20ModuleIndexer) {
 	// history
+	copyDup.EnableSelfMintHeight = base.EnableSelfMintHeight
 	// for _, h := range base.AllHistory {
 	// 	copyDup.AllHistory = append(copyDup.AllHistory, h)
 	// }

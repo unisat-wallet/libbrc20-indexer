@@ -34,6 +34,7 @@ type InscriptionBRC20Data struct {
 	PkScript string `json:"-"`
 
 	InscriptionNumber int64
+	Parent            []byte
 	ContentBody       []byte
 	CreateIdxKey      string
 
@@ -54,13 +55,14 @@ func (data *InscriptionBRC20Data) GetInscriptionId() string {
 }
 
 type InscriptionBRC20InfoResp struct {
-	Operation    string `json:"op,omitempty"`
-	BRC20Tick    string `json:"tick,omitempty"`
-	BRC20Max     string `json:"max,omitempty"`
-	BRC20Limit   string `json:"lim,omitempty"`
-	BRC20Amount  string `json:"amt,omitempty"`
-	BRC20Decimal string `json:"decimal,omitempty"`
-	BRC20Minted  string `json:"minted,omitempty"`
+	Operation     string `json:"op,omitempty"`
+	BRC20Tick     string `json:"tick,omitempty"`
+	BRC20Max      string `json:"max,omitempty"`
+	BRC20Limit    string `json:"lim,omitempty"`
+	BRC20Amount   string `json:"amt,omitempty"`
+	BRC20Decimal  string `json:"decimal,omitempty"`
+	BRC20Minted   string `json:"minted,omitempty"`
+	BRC20SelfMint string `json:"self_mint,omitempty"`
 }
 
 // decode protocal
@@ -113,12 +115,13 @@ func (body *InscriptionBRC20MintTransferContent) Unmarshal(contentBody []byte) (
 
 // decode deploy data
 type InscriptionBRC20DeployContent struct {
-	Proto        string `json:"p,omitempty"`
-	Operation    string `json:"op,omitempty"`
-	BRC20Tick    string `json:"tick,omitempty"`
-	BRC20Max     string `json:"max,omitempty"`
-	BRC20Limit   string `json:"lim,omitempty"`
-	BRC20Decimal string `json:"dec,omitempty"`
+	Proto         string `json:"p,omitempty"`
+	Operation     string `json:"op,omitempty"`
+	BRC20Tick     string `json:"tick,omitempty"`
+	BRC20Max      string `json:"max,omitempty"`
+	BRC20Limit    string `json:"lim,omitempty"`
+	BRC20Decimal  string `json:"dec,omitempty"`
+	BRC20SelfMint string `json:"self_mint,omitempty"`
 }
 
 func (body *InscriptionBRC20DeployContent) Unmarshal(contentBody []byte) (err error) {
@@ -134,6 +137,12 @@ func (body *InscriptionBRC20DeployContent) Unmarshal(contentBody []byte) (err er
 	}
 	if v, ok := bodyMap["tick"].(string); ok {
 		body.BRC20Tick = v
+	}
+	if _, ok := bodyMap["self_mint"]; ok { // has self_mint
+		body.BRC20SelfMint = "false"
+	}
+	if v, ok := bodyMap["self_mint"].(string); ok { // self_mint is string
+		body.BRC20SelfMint = v
 	}
 	if v, ok := bodyMap["max"].(string); ok {
 		body.BRC20Max = v
@@ -180,7 +189,8 @@ type InscriptionBRC20TickInfo struct {
 	Tick   string
 	Amount *decimal.Decimal `json:"-"`
 	//ContentBody []byte           `json:"content"`
-	Meta *InscriptionBRC20Data
+	Meta     *InscriptionBRC20Data
+	SelfMint bool `json:"-"`
 
 	Max   *decimal.Decimal `json:"-"`
 	Limit *decimal.Decimal `json:"-"`
@@ -219,8 +229,10 @@ func (d *InscriptionBRC20TickInfo) GetInscriptionId() string {
 }
 func (in *InscriptionBRC20TickInfo) DeepCopy() (copy *InscriptionBRC20TickInfo) {
 	copy = &InscriptionBRC20TickInfo{
-		Data:    in.Data,
-		Decimal: in.Decimal,
+		Tick:     in.Tick,
+		SelfMint: in.SelfMint,
+		Data:     in.Data,
+		Decimal:  in.Decimal,
 
 		TxId:   in.TxId,
 		Idx:    in.Idx,
@@ -258,6 +270,7 @@ func (in *InscriptionBRC20TickInfo) DeepCopy() (copy *InscriptionBRC20TickInfo) 
 
 func NewInscriptionBRC20TickInfo(tick, operation string, data *InscriptionBRC20Data) *InscriptionBRC20TickInfo {
 	info := &InscriptionBRC20TickInfo{
+		Tick: tick,
 		Data: &InscriptionBRC20InfoResp{
 			BRC20Tick: tick,
 			Operation: operation,
