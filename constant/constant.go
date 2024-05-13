@@ -1,8 +1,5 @@
 package constant
 
-import (
-	"github.com/btcsuite/btcd/chaincfg"
-)
 const MEMPOOL_HEIGHT = 0x3fffff // 3fffff, 2^22-1
 
 // brc20 protocal
@@ -56,8 +53,6 @@ const (
 	BRC20_HISTORY_SWAP_TYPE_N_INSCRIBE_COMMIT uint8 = 16
 	BRC20_HISTORY_SWAP_TYPE_N_COMMIT          uint8 = 17
 )
-
-const MODULE_SWAP_SOURCE_INSCRIPTION_ID = "d2a30f6131324e06b1366876c8c089d7ad2a9c2b0ea971c5b0dc6198615bda2ei0"
 
 // module op
 const (
@@ -155,10 +150,3 @@ const (
 )
 
 const ZERO_ADDRESS_PKSCRIPT = "\x6a\x20\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
-
-var (
-	DEBUG           = false
-	GlobalNetParams = &chaincfg.MainNetParams
-
-	TICKS_ENABLED = ""
-)

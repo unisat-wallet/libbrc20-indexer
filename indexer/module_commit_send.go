@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/unisat-wallet/libbrc20-indexer/constant"
+	"github.com/unisat-wallet/libbrc20-indexer/conf"
 	"github.com/unisat-wallet/libbrc20-indexer/decimal"
 	"github.com/unisat-wallet/libbrc20-indexer/model"
 	"github.com/unisat-wallet/libbrc20-indexer/utils"
@@ -13,7 +13,7 @@ import (
 
 func (g *BRC20ModuleIndexer) ProcessCommitFunctionSend(moduleInfo *model.BRC20ModuleSwapInfo, f *model.SwapFunctionData) error {
 	addressTo := f.Params[0]
-	pkScriptTo, _ := utils.GetPkScriptByAddress(addressTo, constant.GlobalNetParams)
+	pkScriptTo, _ := utils.GetPkScriptByAddress(addressTo, conf.GlobalNetParams)
 
 	tokenOrPair := f.Params[1]
 	tokenAmtStr := f.Params[2]

@@ -3,9 +3,10 @@ package main
 import (
 	"flag"
 	"log"
+	"os"
 
 	"github.com/btcsuite/btcd/chaincfg"
-	"github.com/unisat-wallet/libbrc20-indexer/constant"
+	"github.com/unisat-wallet/libbrc20-indexer/conf"
 	"github.com/unisat-wallet/libbrc20-indexer/indexer"
 	"github.com/unisat-wallet/libbrc20-indexer/loader"
 	"github.com/unisat-wallet/libbrc20-indexer/model"
@@ -27,7 +28,15 @@ func init() {
 	flag.Parse()
 
 	if testnet {
-		constant.GlobalNetParams = &chaincfg.TestNet3Params
+		conf.GlobalNetParams = &chaincfg.TestNet3Params
+	}
+
+	if ticks := os.Getenv("TICKS_ENABLED"); ticks != "" {
+		conf.TICKS_ENABLED = ticks
+	}
+
+	if id := os.Getenv("MODULE_SWAP_SOURCE_INSCRIPTION_ID"); id != "" {
+		conf.MODULE_SWAP_SOURCE_INSCRIPTION_ID = id
 	}
 }
 

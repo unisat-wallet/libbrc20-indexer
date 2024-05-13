@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/btcsuite/btcd/chaincfg"
+	"github.com/unisat-wallet/libbrc20-indexer/conf"
 	"github.com/unisat-wallet/libbrc20-indexer/constant"
 	"github.com/unisat-wallet/libbrc20-indexer/decimal"
 	"github.com/unisat-wallet/libbrc20-indexer/model"
@@ -266,7 +267,7 @@ func DumpModuleInfoMap(fname string,
 func DumpModuleTickInfoMap(file *os.File, condStateBalanceDataMap map[string]*model.BRC20ModuleConditionalApproveStateBalance,
 	inscriptionsTickerInfoMap, userTokensBalanceData map[string]map[string]*model.BRC20ModuleTokenBalance,
 ) {
-	netParams := constant.GlobalNetParams
+	netParams := conf.GlobalNetParams
 
 	var allTickers []string
 	for ticker := range inscriptionsTickerInfoMap {
@@ -399,7 +400,7 @@ func DumpModuleSwapInfoMap(file *os.File,
 		for _, holder := range allHoldersPkScript {
 			balanceData := holdersMap[holder]
 
-			address, err := utils.GetAddressFromScript([]byte(holder), constant.GlobalNetParams)
+			address, err := utils.GetAddressFromScript([]byte(holder), conf.GlobalNetParams)
 			if err != nil {
 				address = hex.EncodeToString([]byte(holder))
 			}

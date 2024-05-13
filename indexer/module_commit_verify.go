@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/unisat-wallet/libbrc20-indexer/conf"
 	"github.com/unisat-wallet/libbrc20-indexer/constant"
 	"github.com/unisat-wallet/libbrc20-indexer/decimal"
 	"github.com/unisat-wallet/libbrc20-indexer/model"
@@ -135,7 +136,7 @@ func (g *BRC20ModuleIndexer) BRC20ResultsPreVerify(moduleInfo *model.BRC20Module
 		userPkScript := constant.ZERO_ADDRESS_PKSCRIPT
 		// format check
 		if user.Address != "0" {
-			if pk, err := utils.GetPkScriptByAddress(user.Address, constant.GlobalNetParams); err != nil {
+			if pk, err := utils.GetPkScriptByAddress(user.Address, conf.GlobalNetParams); err != nil {
 				return errors.New(fmt.Sprintf("result users[%d] addr(%s) invalid", idxUser, user.Address))
 			} else {
 				userPkScript = string(pk)
@@ -273,7 +274,7 @@ func (g *BRC20ModuleIndexer) ProcessInscribeCommitPreVerify(body *model.Inscript
 	// for previous id
 	functionsByAddressMap := make(map[string][]string)
 	for idx, f := range body.Data {
-		if pkScript, err := utils.GetPkScriptByAddress(f.Address, constant.GlobalNetParams); err != nil {
+		if pkScript, err := utils.GetPkScriptByAddress(f.Address, conf.GlobalNetParams); err != nil {
 			return idx, errors.New("addr invalid")
 		} else {
 			f.PkScript = string(pkScript)
@@ -446,7 +447,7 @@ func (g *BRC20ModuleIndexer) ProcessInscribeCommitPreVerify(body *model.Inscript
 			}
 
 			addressTo := f.Params[0]
-			if _, err := utils.GetPkScriptByAddress(addressTo, constant.GlobalNetParams); err != nil {
+			if _, err := utils.GetPkScriptByAddress(addressTo, conf.GlobalNetParams); err != nil {
 				return idx, errors.New("send addr invalid")
 			}
 
@@ -506,7 +507,7 @@ func (g *BRC20ModuleIndexer) ProcessCommitVerify(commitId string, body *model.In
 		return -1, true, errors.New("commit, function size not match data")
 	}
 	for idx, f := range body.Data {
-		if pkScript, err := utils.GetPkScriptByAddress(f.Address, constant.GlobalNetParams); err != nil {
+		if pkScript, err := utils.GetPkScriptByAddress(f.Address, conf.GlobalNetParams); err != nil {
 			return idx, true, errors.New("commit, addr invalid")
 		} else {
 			f.PkScript = string(pkScript)
@@ -607,7 +608,7 @@ func (g *BRC20ModuleIndexer) InitCherryPickFilter(body *model.InscriptionBRC20Mo
 	pickTokensTick[moduleInfo.GasTick] = true
 
 	for idx, f := range body.Data {
-		if pkScript, err := utils.GetPkScriptByAddress(f.Address, constant.GlobalNetParams); err != nil {
+		if pkScript, err := utils.GetPkScriptByAddress(f.Address, conf.GlobalNetParams); err != nil {
 			return idx, errors.New("addr invalid")
 		} else {
 			pickUsersPkScript[string(pkScript)] = true
@@ -706,7 +707,7 @@ func (g *BRC20ModuleIndexer) InitCherryPickFilter(body *model.InscriptionBRC20Mo
 			}
 
 			addressTo := f.Params[0]
-			if pk, err := utils.GetPkScriptByAddress(addressTo, constant.GlobalNetParams); err != nil {
+			if pk, err := utils.GetPkScriptByAddress(addressTo, conf.GlobalNetParams); err != nil {
 				return idx, errors.New("send addr invalid")
 			} else {
 				pickUsersPkScript[string(pk)] = true

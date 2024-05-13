@@ -6,21 +6,13 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"os"
 
+	"github.com/unisat-wallet/libbrc20-indexer/conf"
 	"github.com/unisat-wallet/libbrc20-indexer/constant"
 	"github.com/unisat-wallet/libbrc20-indexer/decimal"
 	"github.com/unisat-wallet/libbrc20-indexer/model"
 	"github.com/unisat-wallet/libbrc20-indexer/utils"
 )
-
-var MODULE_SWAP_SOURCE_INSCRIPTION_ID = os.Getenv("MODULE_SWAP_SOURCE_INSCRIPTION_ID")
-
-func init() {
-	if MODULE_SWAP_SOURCE_INSCRIPTION_ID == "" {
-		MODULE_SWAP_SOURCE_INSCRIPTION_ID = constant.MODULE_SWAP_SOURCE_INSCRIPTION_ID
-	}
-}
 
 func (g *BRC20ModuleIndexer) ProcessCreateModule(data *model.InscriptionBRC20Data) error {
 	var body model.InscriptionBRC20ModuleDeploySwapContent
@@ -31,7 +23,7 @@ func (g *BRC20ModuleIndexer) ProcessCreateModule(data *model.InscriptionBRC20Dat
 		return err
 	}
 
-	if MODULE_SWAP_SOURCE_INSCRIPTION_ID != body.Source {
+	if conf.MODULE_SWAP_SOURCE_INSCRIPTION_ID != body.Source {
 		return errors.New(fmt.Sprintf("source not match: %s", body.Source))
 	}
 
@@ -65,7 +57,7 @@ func (g *BRC20ModuleIndexer) ProcessCreateModule(data *model.InscriptionBRC20Dat
 	// sequencer default
 	sequencerPkScript := data.PkScript
 	if sequencer, ok := body.Init["sequencer"]; ok {
-		if pk, err := utils.GetPkScriptByAddress(sequencer, constant.GlobalNetParams); err != nil {
+		if pk, err := utils.GetPkScriptByAddress(sequencer, conf.GlobalNetParams); err != nil {
 			return errors.New("sequencer invalid")
 		} else {
 			sequencerPkScript = string(pk)
@@ -77,7 +69,7 @@ func (g *BRC20ModuleIndexer) ProcessCreateModule(data *model.InscriptionBRC20Dat
 	// gasTo default
 	gasToPkScript := data.PkScript
 	if gasTo, ok := body.Init["gas_to"]; ok {
-		if pk, err := utils.GetPkScriptByAddress(gasTo, constant.GlobalNetParams); err != nil {
+		if pk, err := utils.GetPkScriptByAddress(gasTo, conf.GlobalNetParams); err != nil {
 			return errors.New("gasTo invalid")
 		} else {
 			gasToPkScript = string(pk)
@@ -89,7 +81,7 @@ func (g *BRC20ModuleIndexer) ProcessCreateModule(data *model.InscriptionBRC20Dat
 	// lpFeeTo default
 	lpFeeToPkScript := data.PkScript
 	if lpFeeTo, ok := body.Init["fee_to"]; ok {
-		if pk, err := utils.GetPkScriptByAddress(lpFeeTo, constant.GlobalNetParams); err != nil {
+		if pk, err := utils.GetPkScriptByAddress(lpFeeTo, conf.GlobalNetParams); err != nil {
 			return errors.New("lpFeeTo invalid")
 		} else {
 			lpFeeToPkScript = string(pk)

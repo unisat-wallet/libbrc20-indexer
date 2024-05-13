@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"log"
 
+	"github.com/unisat-wallet/libbrc20-indexer/conf"
 	"github.com/unisat-wallet/libbrc20-indexer/constant"
 	"github.com/unisat-wallet/libbrc20-indexer/model"
 )
@@ -123,7 +124,7 @@ func (g *BRC20ModuleIndexer) ProcessUpdateLatestBRC20Loop(brc20Datas chan *model
 
 		if err := process(data); err != nil {
 			if body.Operation == constant.BRC20_OP_MINT {
-				if constant.DEBUG {
+				if conf.DEBUG {
 					log.Printf("(%d %%) process failed: %s", percent, err)
 				}
 			} else {

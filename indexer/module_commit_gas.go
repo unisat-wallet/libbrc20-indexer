@@ -5,7 +5,7 @@ import (
 	"errors"
 	"log"
 
-	"github.com/unisat-wallet/libbrc20-indexer/constant"
+	"github.com/unisat-wallet/libbrc20-indexer/conf"
 	"github.com/unisat-wallet/libbrc20-indexer/decimal"
 	"github.com/unisat-wallet/libbrc20-indexer/model"
 	"github.com/unisat-wallet/libbrc20-indexer/utils"
@@ -16,7 +16,7 @@ func (g *BRC20ModuleIndexer) ProcessCommitFunctionGasFee(moduleInfo *model.BRC20
 	tokenBalance := moduleInfo.GetUserTokenBalance(moduleInfo.GasTick, userPkScript)
 	// fixme: Must use the confirmed amount
 	if tokenBalance.SwapAccountBalance.Cmp(gasAmt) < 0 {
-		address, err := utils.GetAddressFromScript([]byte(userPkScript), constant.GlobalNetParams)
+		address, err := utils.GetAddressFromScript([]byte(userPkScript), conf.GlobalNetParams)
 		if err != nil {
 			address = hex.EncodeToString([]byte(userPkScript))
 		}

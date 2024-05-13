@@ -8,6 +8,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/unisat-wallet/libbrc20-indexer/conf"
 	"github.com/unisat-wallet/libbrc20-indexer/constant"
 	"github.com/unisat-wallet/libbrc20-indexer/decimal"
 	"github.com/unisat-wallet/libbrc20-indexer/model"
@@ -121,12 +122,12 @@ func (g *BRC20ModuleIndexer) ProcessConditionalApproveEvents(events []*model.Con
 		inscriptionId := event.FromData.GetInscriptionId()
 
 		// from address
-		addressFrom, err := utils.GetAddressFromScript([]byte(event.From), constant.GlobalNetParams)
+		addressFrom, err := utils.GetAddressFromScript([]byte(event.From), conf.GlobalNetParams)
 		if err != nil {
 			addressFrom = hex.EncodeToString([]byte(event.From))
 		}
 		// to address
-		addressTo, err := utils.GetAddressFromScript([]byte(event.To), constant.GlobalNetParams)
+		addressTo, err := utils.GetAddressFromScript([]byte(event.To), conf.GlobalNetParams)
 		if err != nil {
 			addressTo = hex.EncodeToString([]byte(event.From))
 		}
