@@ -23,6 +23,7 @@ func (g *BRC20ModuleIndexer) ProcessDeploy(data *model.InscriptionBRC20Data) err
 		return nil
 		// return errors.New("deploy, tick length not 4 or 5")
 	}
+
 	if len(body.BRC20Tick) == 5 {
 		if body.BRC20SelfMint != "true" {
 			return nil
@@ -50,6 +51,7 @@ func (g *BRC20ModuleIndexer) ProcessDeploy(data *model.InscriptionBRC20Data) err
 	tinfo.Data.BRC20Decimal = body.BRC20Decimal
 	tinfo.Data.BRC20Minted = "0"
 	tinfo.InscriptionNumberStart = data.InscriptionNumber
+
 	if len(body.BRC20Tick) == 5 && body.BRC20SelfMint == "true" {
 		tinfo.SelfMint = true
 		tinfo.Data.BRC20SelfMint = "true"
@@ -80,6 +82,7 @@ func (g *BRC20ModuleIndexer) ProcessDeploy(data *model.InscriptionBRC20Data) err
 			return nil
 			// return errors.New("deploy, but max invalid (range)")
 		}
+
 		if max.Sign() == 0 {
 			if tinfo.SelfMint {
 				tinfo.Max = max.GetMaxUint64()
