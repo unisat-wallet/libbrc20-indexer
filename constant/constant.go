@@ -3,6 +3,7 @@ package constant
 import (
 	"github.com/btcsuite/btcd/chaincfg"
 )
+const MEMPOOL_HEIGHT = 0x3fffff // 3fffff, 2^22-1
 
 // brc20 protocal
 const (
