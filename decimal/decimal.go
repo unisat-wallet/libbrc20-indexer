@@ -253,6 +253,7 @@ func (d *Decimal) GetMaxUint64() *Decimal {
 	value := new(big.Int).Mul(integerPart, precisionFactor[d.Precition])
 	return &Decimal{Precition: d.Precition, Value: value}
 }
+
 func (d *Decimal) Float64() float64 {
 	if d == nil {
 		return 0
