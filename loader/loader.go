@@ -10,7 +10,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/unisat-wallet/libbrc20-indexer/conf"
 	"github.com/unisat-wallet/libbrc20-indexer/constant"
 	"github.com/unisat-wallet/libbrc20-indexer/decimal"
@@ -129,7 +128,6 @@ func DumpTickerInfoMap(fname string,
 	userTokensBalanceData map[string]map[string]*model.BRC20TokenBalance,
 	tokenUsersBalanceData map[string]map[string]*model.BRC20TokenBalance,
 ) {
-	netParams := &chaincfg.MainNetParams
 
 	file, err := os.OpenFile(fname, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0777)
 	if err != nil {
@@ -169,12 +167,12 @@ func DumpTickerInfoMap(fname string,
 				continue
 			}
 
-			addressFrom, err := utils.GetAddressFromScript([]byte(h.PkScriptFrom), netParams)
+			addressFrom, err := utils.GetAddressFromScript([]byte(h.PkScriptFrom), conf.GlobalNetParams)
 			if err != nil {
 				addressFrom = hex.EncodeToString([]byte(h.PkScriptFrom))
 			}
 
-			addressTo, err := utils.GetAddressFromScript([]byte(h.PkScriptTo), netParams)
+			addressTo, err := utils.GetAddressFromScript([]byte(h.PkScriptTo), conf.GlobalNetParams)
 			if err != nil {
 				addressTo = hex.EncodeToString([]byte(h.PkScriptTo))
 			}
@@ -203,7 +201,7 @@ func DumpTickerInfoMap(fname string,
 		for _, holder := range allHoldersPkScript {
 			balanceData := tokenUsersBalanceData[ticker][holder]
 
-			address, err := utils.GetAddressFromScript([]byte(balanceData.PkScript), netParams)
+			address, err := utils.GetAddressFromScript([]byte(balanceData.PkScript), conf.GlobalNetParams)
 			if err != nil {
 				address = hex.EncodeToString([]byte(balanceData.PkScript))
 			}
@@ -267,7 +265,6 @@ func DumpModuleInfoMap(fname string,
 func DumpModuleTickInfoMap(file *os.File, condStateBalanceDataMap map[string]*model.BRC20ModuleConditionalApproveStateBalance,
 	inscriptionsTickerInfoMap, userTokensBalanceData map[string]map[string]*model.BRC20ModuleTokenBalance,
 ) {
-	netParams := conf.GlobalNetParams
 
 	var allTickers []string
 	for ticker := range inscriptionsTickerInfoMap {
@@ -309,7 +306,7 @@ func DumpModuleTickInfoMap(file *os.File, condStateBalanceDataMap map[string]*mo
 		for _, holder := range allHoldersPkScript {
 			balanceData := holdersMap[holder]
 
-			address, err := utils.GetAddressFromScript([]byte(balanceData.PkScript), netParams)
+			address, err := utils.GetAddressFromScript([]byte(balanceData.PkScript), conf.GlobalNetParams)
 			if err != nil {
 				address = hex.EncodeToString([]byte(balanceData.PkScript))
 			}
