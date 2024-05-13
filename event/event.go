@@ -9,9 +9,10 @@ import (
 	"os"
 	"regexp"
 	"strings"
-	"unisatquery/lib/brc20_swap/constant"
-	"unisatquery/lib/brc20_swap/model"
-	libUtils "unisatquery/lib/utils"
+
+	"github.com/unisat-wallet/libbrc20-indexer/constant"
+	"github.com/unisat-wallet/libbrc20-indexer/model"
+	"github.com/unisat-wallet/libbrc20-indexer/utils"
 )
 
 func InitTickDataFromFile(fname string) (brc20Datas []*model.InscriptionBRC20Data, err error) {
@@ -113,12 +114,12 @@ func GenerateBRC20InputDataFromEvents(fname string) (brc20Datas []*model.Inscrip
 		data.CreateIdxKey = key.String()
 
 		var pkScriptFrom, pkScriptTo string
-		if pk, err := libUtils.GetPkScriptByAddress(e.AddressFrom); err != nil {
+		if pk, err := utils.GetPkScriptByAddress(e.AddressFrom, constant.GlobalNetParams); err != nil {
 			log.Printf("GenerateBRC20InputDataFromEvents [%d] pk invalid: %s", idx, err)
 		} else {
 			pkScriptFrom = string(pk)
 		}
-		if pk, err := libUtils.GetPkScriptByAddress(e.AddressTo); err != nil {
+		if pk, err := utils.GetPkScriptByAddress(e.AddressTo, constant.GlobalNetParams); err != nil {
 			pk, _ := hex.DecodeString(e.AddressTo)
 			pkScriptTo = string(pk)
 		} else {
