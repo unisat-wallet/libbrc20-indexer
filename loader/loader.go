@@ -210,7 +210,7 @@ func DumpTickerInfoMap(fname string,
 				address,
 				len(balanceData.History),
 				len(balanceData.ValidTransferMap),
-				balanceData.AvailableBalance.Add(balanceData.TransferableBalance).String(),
+				balanceData.OverallBalance().String(),
 				len(userTokensBalanceData[holder]),
 			)
 		}
