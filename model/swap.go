@@ -97,7 +97,6 @@ type InscriptionBRC20ModuleSwapCommitContent struct {
 	Module    string `json:"module,omitempty"`
 
 	Parent   string              `json:"parent,omitempty"`
-	Quit     string              `json:"quit,omitempty"`
 	GasPrice string              `json:"gas_price,omitempty"`
 	Data     []*SwapFunctionData `json:"data,omitempty"`
 }
