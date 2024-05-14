@@ -152,7 +152,7 @@ func (g *BRC20ModuleIndexer) ProcessUpdateLatestBRC20Loop(brc20Datas, brc20Datas
 		}
 	}
 
-	log.Printf("process swap finish. ticker: %d, users: %d, tokens: %d, validInscription: %d, validTransfer: %d, invalidTransfer: %d",
+	log.Printf("process swap finish. ticker: %d, users: %d, tokens: %d, validInscription: %d, validTransfer: %d, invalidTransfer: %d, history: %d",
 		len(g.InscriptionsTickerInfoMap),
 		len(g.UserTokensBalanceData),
 		len(g.TokenUsersBalanceData),
@@ -161,6 +161,8 @@ func (g *BRC20ModuleIndexer) ProcessUpdateLatestBRC20Loop(brc20Datas, brc20Datas
 
 		len(g.InscriptionsValidTransferMap),
 		len(g.InscriptionsInvalidTransferMap),
+
+		g.HistoryCount,
 	)
 
 	nswap := 0
