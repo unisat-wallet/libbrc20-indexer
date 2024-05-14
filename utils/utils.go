@@ -53,6 +53,9 @@ func GetHash256(data []byte) (hash []byte) {
 }
 
 func HashString(data []byte) (res string) {
+	if len(data) != 32 {
+		return "0000000000000000000000000000000000000000000000000000000000000000"
+	}
 	length := 32
 	var reverseData [32]byte
 
