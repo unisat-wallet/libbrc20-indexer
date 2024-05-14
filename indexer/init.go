@@ -309,6 +309,10 @@ func (copyDup *BRC20ModuleIndexer) deepCopyBRC20Data(base *BRC20ModuleIndexer) {
 	for k, v := range base.InscriptionsValidTransferMap {
 		copyDup.InscriptionsValidTransferMap[k] = v
 	}
+	// fixme: disable invalid copy
+	for k, v := range base.InscriptionsInvalidTransferMap {
+		copyDup.InscriptionsInvalidTransferMap[k] = v
+	}
 
 	log.Printf("deepCopyBRC20Data finish. total: %d", len(base.InscriptionsTickerInfoMap))
 }
