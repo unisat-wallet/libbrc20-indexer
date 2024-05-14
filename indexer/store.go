@@ -7,7 +7,6 @@ import (
 
 	"github.com/unisat-wallet/libbrc20-indexer/decimal"
 	"github.com/unisat-wallet/libbrc20-indexer/model"
-	"go.uber.org/zap"
 )
 
 type BRC20ModuleIndexerStore struct {
@@ -119,9 +118,7 @@ func (g *BRC20ModuleIndexer) LoadHistory(fname string) {
 		}
 		g.HistoryData = append(g.HistoryData, h)
 	}
-	log.Printf("load brc20 history ok",
-		zap.Int("n", len(g.HistoryData)),
-	)
+	log.Printf("load brc20 history ok: %d", len(g.HistoryData))
 }
 
 func (g *BRC20ModuleIndexer) SaveHistory(fname string) {
