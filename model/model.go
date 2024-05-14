@@ -200,6 +200,7 @@ type InscriptionBRC20TickInfo struct {
 	ConfirmedMinted    *decimal.Decimal `json:"-"`
 	ConfirmedMinted1h  *decimal.Decimal `json:"-"`
 	ConfirmedMinted24h *decimal.Decimal `json:"-"`
+	Burned             *decimal.Decimal `json:"-"`
 
 	MintTimes uint32 `json:"-"`
 	Decimal   uint8  `json:"-"`
@@ -257,6 +258,7 @@ func (in *InscriptionBRC20TickInfo) DeepCopy() (copy *InscriptionBRC20TickInfo) 
 		ConfirmedMinted:    decimal.NewDecimalCopy(in.ConfirmedMinted),
 		ConfirmedMinted1h:  decimal.NewDecimalCopy(in.ConfirmedMinted1h),
 		ConfirmedMinted24h: decimal.NewDecimalCopy(in.ConfirmedMinted24h),
+		Burned:             decimal.NewDecimalCopy(in.Burned),
 		Amount:             decimal.NewDecimalCopy(in.Amount),
 
 		MintTimes: in.MintTimes,

@@ -122,6 +122,10 @@ func (g *BRC20ModuleIndexer) ProcessMint(data *model.InscriptionBRC20Data) error
 	}
 	tokenBalance.AvailableBalance = tokenBalance.AvailableBalance.Add(balanceMinted)
 
+	// burn
+	if len(data.PkScript) == 1 && data.PkScript[0] == 0x6a {
+		tinfo.Burned = tinfo.Burned.Add(balanceMinted)
+	}
 
 	if g.EnableHistory {
 		// history
