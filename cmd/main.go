@@ -9,7 +9,6 @@ import (
 	"github.com/unisat-wallet/libbrc20-indexer/conf"
 	"github.com/unisat-wallet/libbrc20-indexer/indexer"
 	"github.com/unisat-wallet/libbrc20-indexer/loader"
-	"github.com/unisat-wallet/libbrc20-indexer/model"
 )
 
 var (
@@ -41,7 +40,7 @@ func init() {
 }
 
 func main() {
-	brc20Datas := make(chan *model.InscriptionBRC20Data, 10240)
+	brc20Datas := make(chan interface{}, 10240)
 	go func() {
 		if err := loader.LoadBRC20InputData(inputfile, brc20Datas); err != nil {
 			log.Printf("invalid input, %s", err)
@@ -50,7 +49,8 @@ func main() {
 	}()
 
 	g := &indexer.BRC20ModuleIndexer{}
-	g.ProcessUpdateLatestBRC20Init(brc20Datas)
+	g.Init()
+	g.ProcessUpdateLatestBRC20Loop(brc20Datas, nil)
 
 	loader.DumpTickerInfoMap(outputfile,
 		g.HistoryData,

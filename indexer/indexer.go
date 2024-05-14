@@ -26,13 +26,13 @@ func isJson(contentBody []byte) bool {
 }
 
 // ProcessUpdateLatestBRC20Loop
-func (g *BRC20ModuleIndexer) ProcessUpdateLatestBRC20Loop(brc20Datas chan *model.InscriptionBRC20Data) {
-	totalDataCount := 100
-	log.Printf("process swap update. total %d", totalDataCount)
-	idx := 0
-	for data := range brc20Datas {
-		percent := idx * 100 / totalDataCount
-		idx += 1
+func (g *BRC20ModuleIndexer) ProcessUpdateLatestBRC20Loop(brc20Datas, brc20DatasDump chan interface{}) {
+	if brc20Datas == nil {
+		return
+	}
+
+	for dataIn := range brc20Datas {
+		data := dataIn.(*model.InscriptionBRC20Data)
 
 		// is sending transfer
 		if data.IsTransfer {
@@ -125,10 +125,10 @@ func (g *BRC20ModuleIndexer) ProcessUpdateLatestBRC20Loop(brc20Datas chan *model
 		if err := process(data); err != nil {
 			if body.Operation == constant.BRC20_OP_MINT {
 				if conf.DEBUG {
-					log.Printf("(%d %%) process failed: %s", percent, err)
+					log.Printf("(%d %%) process failed: %s", 0, err)
 				}
 			} else {
-				log.Printf("(%d %%) process failed: %s", percent, err)
+				log.Printf("(%d %%) process failed: %s", 0, err)
 			}
 		}
 	}
@@ -177,11 +177,7 @@ func (g *BRC20ModuleIndexer) ProcessUpdateLatestBRC20Loop(brc20Datas chan *model
 }
 
 // ProcessUpdateLatestBRC20Init
-func (g *BRC20ModuleIndexer) ProcessUpdateLatestBRC20Init(brc20Datas chan *model.InscriptionBRC20Data) {
-	log.Printf("process swap init. total %d", len(brc20Datas))
-
+func (g *BRC20ModuleIndexer) Init() {
 	g.initBRC20()
 	g.initModule()
-
-	g.ProcessUpdateLatestBRC20Loop(brc20Datas)
 }
