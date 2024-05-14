@@ -4,7 +4,9 @@ import (
 	"errors"
 	"log"
 	"strconv"
+	"strings"
 
+	"github.com/unisat-wallet/libbrc20-indexer/conf"
 	"github.com/unisat-wallet/libbrc20-indexer/constant"
 	"github.com/unisat-wallet/libbrc20-indexer/decimal"
 	"github.com/unisat-wallet/libbrc20-indexer/model"
@@ -34,6 +36,17 @@ func (g *BRC20ModuleIndexer) ProcessDeploy(data *model.InscriptionBRC20Data) err
 			// return errors.New("deploy, tick length 5, but not enabled")
 		}
 	}
+
+	// tick enable, fixme: test only, not support space in ticker
+	if conf.TICKS_ENABLED != "" {
+		if strings.Contains(uniqueLowerTicker, " ") {
+			return nil
+		}
+		if !strings.Contains(conf.TICKS_ENABLED, uniqueLowerTicker) {
+			return nil
+		}
+	}
+
 	if _, ok := g.InscriptionsTickerInfoMap[uniqueLowerTicker]; ok { // dup ticker
 		return nil
 		// return errors.New("deploy, but tick exist")
