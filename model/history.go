@@ -23,7 +23,7 @@ type BRC20HistoryBase struct {
 type BRC20History struct {
 	BRC20HistoryBase
 
-	Inscription *InscriptionBRC20TickInfoResp
+	Inscription InscriptionBRC20TickInfoResp
 
 	// param
 	Amount string
@@ -44,7 +44,7 @@ func NewBRC20History(historyType uint8, isValid bool, isTransfer bool,
 			TxIdx:     to.TxIdx,
 			BlockTime: to.BlockTime,
 		},
-		Inscription: &InscriptionBRC20TickInfoResp{
+		Inscription: InscriptionBRC20TickInfoResp{
 			Height:            from.Height,
 			Data:              from.Data,
 			InscriptionNumber: from.InscriptionNumber,
