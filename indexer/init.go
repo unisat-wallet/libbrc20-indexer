@@ -10,9 +10,8 @@ import (
 )
 
 type BRC20ModuleIndexer struct {
-	BestHeight           uint32
-	EnableSelfMintHeight uint32
-	EnableHistory        bool
+	BestHeight    uint32
+	EnableHistory bool
 
 	HistoryCount uint32
 	HistoryData  [][]byte
@@ -108,6 +107,7 @@ func (g *BRC20ModuleIndexer) UpdateHistoryHeightAndGetHistoryIndex(historyObj *m
 func (g *BRC20ModuleIndexer) initBRC20() {
 	g.EnableHistory = true
 	g.BestHeight = 0
+
 	g.HistoryCount = 0
 	g.HistoryData = make([][]byte, 0)
 
@@ -237,7 +237,6 @@ func (g *BRC20ModuleIndexer) GenerateApproveEventsByApprove(owner string, balanc
 func (copyDup *BRC20ModuleIndexer) deepCopyBRC20Data(base *BRC20ModuleIndexer) {
 	// history
 	copyDup.BestHeight = base.BestHeight
-	copyDup.EnableSelfMintHeight = base.EnableSelfMintHeight
 	copyDup.EnableHistory = base.EnableHistory
 	copyDup.HistoryCount = base.HistoryCount
 

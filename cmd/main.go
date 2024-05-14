@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log"
 	"os"
+	"strconv"
 
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/unisat-wallet/libbrc20-indexer/conf"
@@ -36,6 +37,12 @@ func init() {
 
 	if id := os.Getenv("MODULE_SWAP_SOURCE_INSCRIPTION_ID"); id != "" {
 		conf.MODULE_SWAP_SOURCE_INSCRIPTION_ID = id
+	}
+
+	if heightStr := os.Getenv("BRC20_ENABLE_SELF_MINT_HEIGHT"); heightStr != "" {
+		if h, err := strconv.Atoi(heightStr); err != nil {
+			conf.ENABLE_SELF_MINT_HEIGHT = uint32(h)
+		}
 	}
 }
 

@@ -31,7 +31,7 @@ func (g *BRC20ModuleIndexer) ProcessDeploy(data *model.InscriptionBRC20Data) err
 			return nil
 			// return errors.New("deploy, tick length 5, but not self_mint")
 		}
-		if data.Height < g.EnableSelfMintHeight {
+		if data.Height < conf.ENABLE_SELF_MINT_HEIGHT {
 			return nil
 			// return errors.New("deploy, tick length 5, but not enabled")
 		}
