@@ -21,11 +21,13 @@ func (g *BRC20ModuleIndexer) GetTransferInfoByKey(createIdxKey string) (
 		if !ok {
 			transferInfo = nil
 		} else {
-			delete(g.InscriptionsInvalidTransferMap, createIdxKey)
+			// don't remove. use for api valid data
+			// delete(g.InscriptionsInvalidTransferMap, createIdxKey)
 		}
 		isInvalid = true
 	} else {
-		delete(g.InscriptionsValidTransferMap, createIdxKey)
+		// don't remove. use for api valid data
+		// delete(g.InscriptionsValidTransferMap, createIdxKey)
 	}
 
 	return transferInfo, isInvalid
