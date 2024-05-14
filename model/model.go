@@ -227,6 +227,7 @@ type InscriptionBRC20TickInfo struct {
 func (d *InscriptionBRC20TickInfo) GetInscriptionId() string {
 	return fmt.Sprintf("%si%d", utils.HashString([]byte(d.TxId)), d.Idx)
 }
+
 func (in *InscriptionBRC20TickInfo) DeepCopy() (copy *InscriptionBRC20TickInfo) {
 	copy = &InscriptionBRC20TickInfo{
 		Tick:     in.Tick,
