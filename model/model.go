@@ -189,8 +189,8 @@ type InscriptionBRC20TickInfo struct {
 	Data   *InscriptionBRC20InfoResp `json:"data"`
 	Tick   string
 	Amount *decimal.Decimal `json:"-"`
-	//ContentBody []byte           `json:"content"`
-	Meta     *InscriptionBRC20Data
+	Meta   *InscriptionBRC20Data
+
 	SelfMint bool `json:"-"`
 
 	Max   *decimal.Decimal `json:"-"`
@@ -234,8 +234,9 @@ func (in *InscriptionBRC20TickInfo) DeepCopy() (copy *InscriptionBRC20TickInfo) 
 	copy = &InscriptionBRC20TickInfo{
 		Tick:     in.Tick,
 		SelfMint: in.SelfMint,
-		Data:     in.Data,
-		Decimal:  in.Decimal,
+
+		Data:    in.Data,
+		Decimal: in.Decimal,
 
 		TxId:   in.TxId,
 		Idx:    in.Idx,
