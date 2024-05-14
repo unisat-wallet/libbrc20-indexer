@@ -32,6 +32,7 @@ type InscriptionBRC20Data struct {
 
 	Satoshi  uint64 `json:"-"`
 	PkScript string `json:"-"`
+	Fee      int64  `json:"-"`
 
 	InscriptionNumber int64
 	Parent            []byte

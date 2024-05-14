@@ -49,6 +49,7 @@ func NewBRC20History(historyType uint8, isValid bool, isTransfer bool,
 			Height:    to.Height,
 			TxIdx:     to.TxIdx,
 			BlockTime: to.BlockTime,
+			Fee:       to.Fee,
 		},
 		Inscription: InscriptionBRC20TickInfoResp{
 			Height:            from.Height,
