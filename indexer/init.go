@@ -422,9 +422,9 @@ func (copyDup *BRC20ModuleIndexer) cherryPickModuleData(base *BRC20ModuleIndexer
 }
 
 func (base *BRC20ModuleIndexer) DeepCopy() (copyDup *BRC20ModuleIndexer) {
+	log.Printf("DeepCopy enter")
 	copyDup = &BRC20ModuleIndexer{}
-	copyDup.initBRC20()
-	copyDup.initModule()
+	copyDup.Init()
 
 	copyDup.deepCopyBRC20Data(base)
 	copyDup.deepCopyModuleData(base)
@@ -432,9 +432,9 @@ func (base *BRC20ModuleIndexer) DeepCopy() (copyDup *BRC20ModuleIndexer) {
 }
 
 func (base *BRC20ModuleIndexer) CherryPick(module string, pickUsersPkScript, pickTokensTick, pickPoolsPair map[string]bool) (copyDup *BRC20ModuleIndexer) {
+	log.Printf("CherryPick enter")
 	copyDup = &BRC20ModuleIndexer{}
-	copyDup.initBRC20()
-	copyDup.initModule()
+	copyDup.Init()
 
 	moduleInfo, ok := base.ModulesInfoMap[module]
 	if ok {
