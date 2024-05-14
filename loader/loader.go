@@ -124,6 +124,7 @@ func LoadBRC20InputData(fname string, brc20Datas chan *model.InscriptionBRC20Dat
 }
 
 func DumpTickerInfoMap(fname string,
+	historyData [][]byte,
 	inscriptionsTickerInfoMap map[string]*model.BRC20TokenInfo,
 	userTokensBalanceData map[string]map[string]*model.BRC20TokenBalance,
 	tokenUsersBalanceData map[string]map[string]*model.BRC20TokenBalance,
@@ -147,7 +148,11 @@ func DumpTickerInfoMap(fname string,
 	for _, ticker := range allTickers {
 		info := inscriptionsTickerInfoMap[ticker]
 		nValid := 0
-		for _, h := range info.History {
+		for _, hIdx := range info.History {
+			buf := historyData[hIdx]
+			h := &model.BRC20History{}
+			h.Unmarshal(buf)
+
 			if h.Valid {
 				nValid++
 			}
@@ -162,7 +167,11 @@ func DumpTickerInfoMap(fname string,
 		)
 
 		// history
-		for _, h := range info.History {
+		for _, hIdx := range info.History {
+			buf := historyData[hIdx]
+			h := &model.BRC20History{}
+			h.Unmarshal(buf)
+
 			if !h.Valid {
 				continue
 			}

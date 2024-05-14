@@ -171,10 +171,10 @@ type BRC20TokenInfo struct {
 	Ticker string
 	Deploy *InscriptionBRC20TickInfo
 
-	History                 []*BRC20History
-	HistoryMint             []*BRC20History
-	HistoryInscribeTransfer []*BRC20History
-	HistoryTransfer         []*BRC20History
+	History                 []uint32
+	HistoryMint             []uint32
+	HistoryInscribeTransfer []uint32
+	HistoryTransfer         []uint32
 }
 
 type InscriptionBRC20TransferInfo struct {
@@ -297,7 +297,7 @@ func NewInscriptionBRC20TickInfo(tick, operation string, data *InscriptionBRC20D
 
 // all history for user
 type BRC20UserHistory struct {
-	History []*BRC20History
+	History []uint32
 }
 
 // state of address for each tick, (balance and history)
@@ -309,11 +309,11 @@ type BRC20TokenBalance struct {
 	TransferableBalance  *decimal.Decimal
 	ValidTransferMap     map[string]*InscriptionBRC20TickInfo
 
-	History                 []*BRC20History
-	HistoryMint             []*BRC20History
-	HistoryInscribeTransfer []*BRC20History
-	HistorySend             []*BRC20History
-	HistoryReceive          []*BRC20History
+	History                 []uint32
+	HistoryMint             []uint32
+	HistoryInscribeTransfer []uint32
+	HistorySend             []uint32
+	HistoryReceive          []uint32
 }
 
 func (bal *BRC20TokenBalance) OverallBalance() *decimal.Decimal {
@@ -334,19 +334,19 @@ func (in *BRC20TokenBalance) DeepCopy() (tb *BRC20TokenBalance) {
 		tb.ValidTransferMap[k] = v.DeepCopy()
 	}
 
-	tb.History = make([]*BRC20History, len(in.History))
+	tb.History = make([]uint32, len(in.History))
 	copy(tb.History, in.History)
 
-	tb.HistoryMint = make([]*BRC20History, len(in.HistoryMint))
+	tb.HistoryMint = make([]uint32, len(in.HistoryMint))
 	copy(tb.HistoryMint, in.HistoryMint)
 
-	tb.HistoryInscribeTransfer = make([]*BRC20History, len(in.HistoryInscribeTransfer))
+	tb.HistoryInscribeTransfer = make([]uint32, len(in.HistoryInscribeTransfer))
 	copy(tb.HistoryInscribeTransfer, in.HistoryInscribeTransfer)
 
-	tb.HistorySend = make([]*BRC20History, len(in.HistorySend))
+	tb.HistorySend = make([]uint32, len(in.HistorySend))
 	copy(tb.HistorySend, in.HistorySend)
 
-	tb.HistoryReceive = make([]*BRC20History, len(in.HistoryReceive))
+	tb.HistoryReceive = make([]uint32, len(in.HistoryReceive))
 	copy(tb.HistoryReceive, in.HistoryReceive)
 	return tb
 }

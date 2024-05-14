@@ -122,10 +122,19 @@ func (g *BRC20ModuleIndexer) ProcessDeploy(data *model.InscriptionBRC20Data) err
 
 	tokenBalance := &model.BRC20TokenBalance{Ticker: body.BRC20Tick, PkScript: data.PkScript}
 
-	history := model.NewBRC20History(constant.BRC20_HISTORY_TYPE_N_INSCRIBE_DEPLOY, true, false, tinfo, nil, data)
-	tokenBalance.History = append(tokenBalance.History, history)
-	tokenInfo.History = append(tokenInfo.History, history)
+	if g.EnableHistory {
+		historyObj := model.NewBRC20History(constant.BRC20_HISTORY_TYPE_N_INSCRIBE_DEPLOY, true, false, tinfo, nil, data)
+		history := g.UpdateHistoryHeightAndGetHistoryIndex(historyObj)
 
+		tokenBalance.History = append(tokenBalance.History, history)
+		tokenInfo.History = append(tokenInfo.History, history)
+
+		// user history
+		userHistory := g.GetBRC20HistoryByUser(string(data.PkScript))
+		userHistory.History = append(userHistory.History, history)
+		// all history
+		g.AllHistory = append(g.AllHistory, history)
+	}
 	// init user tokens
 	var userTokens map[string]*model.BRC20TokenBalance
 	if tokens, ok := g.UserTokensBalanceData[string(data.PkScript)]; !ok {

@@ -53,6 +53,7 @@ func main() {
 	g.ProcessUpdateLatestBRC20Init(brc20Datas)
 
 	loader.DumpTickerInfoMap(outputfile,
+		g.HistoryData,
 		g.InscriptionsTickerInfoMap,
 		g.UserTokensBalanceData,
 		g.TokenUsersBalanceData,

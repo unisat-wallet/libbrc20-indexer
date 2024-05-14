@@ -72,11 +72,15 @@ func (g *BRC20ModuleIndexer) ProcessMint(data *model.InscriptionBRC20Data) error
 	mintInfo.Amount = amt
 	if tinfo.TotalMinted.Cmp(tinfo.Max) >= 0 {
 		// invalid history
-		history := model.NewBRC20History(constant.BRC20_HISTORY_TYPE_N_INSCRIBE_MINT, false, false, mintInfo, tokenBalance, data)
-		tokenBalance.History = append(tokenBalance.History, history)
-		tokenBalance.HistoryMint = append(tokenBalance.HistoryMint, history)
-		tokenInfo.History = append(tokenInfo.History, history)
-		tokenInfo.HistoryMint = append(tokenInfo.HistoryMint, history)
+		if g.EnableHistory {
+			historyObj := model.NewBRC20History(constant.BRC20_HISTORY_TYPE_N_INSCRIBE_MINT, false, false, mintInfo, tokenBalance, data)
+			history := g.UpdateHistoryHeightAndGetHistoryIndex(historyObj)
+
+			tokenBalance.History = append(tokenBalance.History, history)
+			tokenBalance.HistoryMint = append(tokenBalance.HistoryMint, history)
+			tokenInfo.History = append(tokenInfo.History, history)
+			tokenInfo.HistoryMint = append(tokenInfo.HistoryMint, history)
+		}
 		return errors.New(fmt.Sprintf("mint %s, but mint out", body.BRC20Tick))
 	}
 
@@ -118,14 +122,23 @@ func (g *BRC20ModuleIndexer) ProcessMint(data *model.InscriptionBRC20Data) error
 	}
 	tokenBalance.AvailableBalance = tokenBalance.AvailableBalance.Add(balanceMinted)
 
-	// history
-	history := model.NewBRC20History(constant.BRC20_HISTORY_TYPE_N_INSCRIBE_MINT, true, false, mintInfo, tokenBalance, data)
-	// tick history
-	tokenBalance.History = append(tokenBalance.History, history)
-	tokenBalance.HistoryMint = append(tokenBalance.HistoryMint, history)
-	tokenInfo.History = append(tokenInfo.History, history)
-	tokenInfo.HistoryMint = append(tokenInfo.HistoryMint, history)
 
+	if g.EnableHistory {
+		// history
+		historyObj := model.NewBRC20History(constant.BRC20_HISTORY_TYPE_N_INSCRIBE_MINT, true, false, mintInfo, tokenBalance, data)
+		history := g.UpdateHistoryHeightAndGetHistoryIndex(historyObj)
+
+		// tick history
+		tokenBalance.History = append(tokenBalance.History, history)
+		tokenBalance.HistoryMint = append(tokenBalance.HistoryMint, history)
+		tokenInfo.History = append(tokenInfo.History, history)
+		tokenInfo.HistoryMint = append(tokenInfo.HistoryMint, history)
+		// user address
+		userHistory := g.GetBRC20HistoryByUser(string(data.PkScript))
+		userHistory.History = append(userHistory.History, history)
+		// all history
+		g.AllHistory = append(g.AllHistory, history)
+	}
 	// g.InscriptionsValidBRC20DataMap[data.CreateIdxKey] = mintInfo.Data
 	return nil
 }
