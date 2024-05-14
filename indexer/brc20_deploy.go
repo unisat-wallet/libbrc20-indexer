@@ -163,6 +163,6 @@ func (g *BRC20ModuleIndexer) ProcessDeploy(data *model.InscriptionBRC20Data) err
 	tokenUsers[string(data.PkScript)] = tokenBalance
 	g.TokenUsersBalanceData[uniqueLowerTicker] = tokenUsers
 
-	// g.InscriptionsValidBRC20DataMap[data.CreateIdxKey] = tinfo.Data
+	g.InscriptionsValidBRC20DataMap[data.CreateIdxKey] = tinfo.Data
 	return nil
 }
