@@ -11,6 +11,7 @@ import (
 
 type BRC20ModuleIndexer struct {
 	BestHeight    uint32
+	Durty         bool // save flag
 	EnableHistory bool
 
 	HistoryCount uint32

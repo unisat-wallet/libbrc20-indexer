@@ -31,6 +31,7 @@ func (g *BRC20ModuleIndexer) ProcessUpdateLatestBRC20Loop(brc20Datas, brc20Datas
 		return
 	}
 
+	g.Durty = false
 	for dataIn := range brc20Datas {
 
 		for {
@@ -39,13 +40,14 @@ func (g *BRC20ModuleIndexer) ProcessUpdateLatestBRC20Loop(brc20Datas, brc20Datas
 			// update latest height
 			g.BestHeight = data.Height
 
-
 			// is sending transfer
 			if data.IsTransfer {
 				// module conditional approve
 				if condApproveInfo, isInvalid := g.GetConditionalApproveInfoByKey(data.CreateIdxKey); condApproveInfo != nil {
 					if err := g.ProcessConditionalApprove(data, condApproveInfo, isInvalid); err != nil {
 						log.Printf("process conditional approve move failed: %s", err)
+					} else {
+						g.Durty = true
 					}
 					break
 				}
@@ -57,24 +59,36 @@ func (g *BRC20ModuleIndexer) ProcessUpdateLatestBRC20Loop(brc20Datas, brc20Datas
 
 				// transfer
 				if transferInfo, isInvalid := g.GetTransferInfoByKey(data.CreateIdxKey); transferInfo != nil {
+					g.Durty = true
+
 					if err := g.ProcessTransfer(data, transferInfo, isInvalid); err != nil {
 						log.Printf("process transfer move failed: %s", err)
+					} else {
+						g.Durty = true
 					}
 					break
 				}
 
 				// module approve
 				if approveInfo, isInvalid := g.GetApproveInfoByKey(data.CreateIdxKey); approveInfo != nil {
+					g.Durty = true
+
 					if err := g.ProcessApprove(data, approveInfo, isInvalid); err != nil {
 						log.Printf("process approve move failed: %s", err)
+					} else {
+						g.Durty = true
 					}
 					break
 				}
 
 				// module commit
 				if commitFrom, isInvalid := g.GetCommitInfoByKey(data.CreateIdxKey); commitFrom != nil {
+					g.Durty = true
+
 					if err := g.ProcessCommit(commitFrom, data, isInvalid); err != nil {
 						log.Printf("process commit move failed: %s", err)
+					} else {
+						g.Durty = true
 					}
 					break
 				}
@@ -136,6 +150,8 @@ func (g *BRC20ModuleIndexer) ProcessUpdateLatestBRC20Loop(brc20Datas, brc20Datas
 				} else {
 					log.Printf("(%d) process failed: %s", g.BestHeight, err)
 				}
+			} else {
+				g.Durty = true
 			}
 			break
 		}
@@ -150,6 +166,9 @@ func (g *BRC20ModuleIndexer) ProcessUpdateLatestBRC20Loop(brc20Datas, brc20Datas
 				delete(holdersBalanceMap, key)
 			}
 		}
+	}
+	if !g.Durty {
+		return
 	}
 
 	log.Printf("process swap finish. ticker: %d, users: %d, tokens: %d, validInscription: %d, validTransfer: %d, invalidTransfer: %d, history: %d",
