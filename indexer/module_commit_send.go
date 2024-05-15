@@ -77,6 +77,11 @@ func (g *BRC20ModuleIndexer) ProcessCommitFunctionSend(moduleInfo *model.BRC20Mo
 		lpBalanceTo := usersLpBalanceInPool[string(pkScriptTo)]
 		lpBalanceTo = lpBalanceTo.Add(tokenLpAmt)
 		usersLpBalanceInPool[string(pkScriptTo)] = lpBalanceTo
+
+		// set update flag
+		moduleInfo.LPTokenUsersBalanceUpdatedMap[poolPair+f.PkScript] = struct{}{}
+		moduleInfo.LPTokenUsersBalanceUpdatedMap[poolPair+string(pkScriptTo)] = struct{}{}
+
 		// touser-lp-balance
 		lpsBalanceTo, ok := moduleInfo.UsersLPTokenBalanceMap[string(pkScriptTo)]
 		if !ok {

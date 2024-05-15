@@ -59,6 +59,7 @@ func (g *BRC20ModuleIndexer) ProcessUpdateLatestBRC20Loop(brc20Datas, brc20Datas
 
 				// transfer
 				if transferInfo, isInvalid := g.GetTransferInfoByKey(data.CreateIdxKey); transferInfo != nil {
+					g.InscriptionsTransferRemoveMap[data.CreateIdxKey] = data.Height
 					g.Durty = true
 
 					if err := g.ProcessTransfer(data, transferInfo, isInvalid); err != nil {
@@ -71,6 +72,7 @@ func (g *BRC20ModuleIndexer) ProcessUpdateLatestBRC20Loop(brc20Datas, brc20Datas
 
 				// module approve
 				if approveInfo, isInvalid := g.GetApproveInfoByKey(data.CreateIdxKey); approveInfo != nil {
+					g.InscriptionsApproveRemoveMap[data.CreateIdxKey] = data.Height
 					g.Durty = true
 
 					if err := g.ProcessApprove(data, approveInfo, isInvalid); err != nil {
@@ -83,6 +85,7 @@ func (g *BRC20ModuleIndexer) ProcessUpdateLatestBRC20Loop(brc20Datas, brc20Datas
 
 				// module commit
 				if commitFrom, isInvalid := g.GetCommitInfoByKey(data.CreateIdxKey); commitFrom != nil {
+					g.InscriptionsCommitRemoveMap[data.CreateIdxKey] = data.Height
 					g.Durty = true
 
 					if err := g.ProcessCommit(commitFrom, data, isInvalid); err != nil {

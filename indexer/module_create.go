@@ -118,7 +118,8 @@ func (g *BRC20ModuleIndexer) ProcessCreateModule(data *model.InscriptionBRC20Dat
 
 		// swap
 		// lp token balance of address in module [pool][address]balance
-		LPTokenUsersBalanceMap: make(map[string]map[string]*decimal.Decimal, 0),
+		LPTokenUsersBalanceMap:        make(map[string]map[string]*decimal.Decimal, 0),
+		LPTokenUsersBalanceUpdatedMap: make(map[string]struct{}, 0),
 
 		// lp token of users in module [moduleid][address][pool]balance
 		UsersLPTokenBalanceMap: make(map[string]map[string]*decimal.Decimal, 0),

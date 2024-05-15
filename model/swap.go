@@ -222,7 +222,8 @@ type BRC20ModuleSwapInfo struct {
 
 	// swap
 	// lp token balance of address in module [pool][address]balance
-	LPTokenUsersBalanceMap map[string]map[string]*decimal.Decimal
+	LPTokenUsersBalanceMap        map[string]map[string]*decimal.Decimal
+	LPTokenUsersBalanceUpdatedMap map[string]struct{} // set if update
 
 	// lp token of users in module [address][pool]balance
 	UsersLPTokenBalanceMap map[string]map[string]*decimal.Decimal
@@ -268,7 +269,8 @@ func (m *BRC20ModuleSwapInfo) DeepCopy() (copy *BRC20ModuleSwapInfo) {
 
 		// swap
 		// lp token balance of address in module [pair][address]balance
-		LPTokenUsersBalanceMap: make(map[string]map[string]*decimal.Decimal, 0),
+		LPTokenUsersBalanceMap:        make(map[string]map[string]*decimal.Decimal, 0),
+		LPTokenUsersBalanceUpdatedMap: make(map[string]struct{}, 0),
 
 		// lp token of users in module [address][pair]balance
 		UsersLPTokenBalanceMap: make(map[string]map[string]*decimal.Decimal, 0),
@@ -365,6 +367,7 @@ func (m *BRC20ModuleSwapInfo) CherryPick(pickUsersPkScript, pickTokensTick, pick
 		GasTick:     m.GasTick,
 
 		// runtime for commit
+		CommitInvalidMap: make(map[string]struct{}, 0),
 		CommitIdChainMap: make(map[string]struct{}, 0),
 		CommitIdMap:      make(map[string]struct{}, 0),
 
@@ -378,7 +381,8 @@ func (m *BRC20ModuleSwapInfo) CherryPick(pickUsersPkScript, pickTokensTick, pick
 
 		// swap
 		// lp token balance of address in module [pair][address]balance
-		LPTokenUsersBalanceMap: make(map[string]map[string]*decimal.Decimal, 0),
+		LPTokenUsersBalanceMap:        make(map[string]map[string]*decimal.Decimal, 0),
+		LPTokenUsersBalanceUpdatedMap: make(map[string]struct{}, 0),
 
 		// lp token of users in module [address][pair]balance
 		UsersLPTokenBalanceMap: make(map[string]map[string]*decimal.Decimal, 0),

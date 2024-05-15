@@ -84,6 +84,8 @@ func (g *BRC20ModuleIndexer) ProcessCommitFunctionAddLiquidity(moduleInfo *model
 				lpFeelpbalance := usersLpBalanceInPool[moduleInfo.LpFeePkScript]
 				lpFeelpbalance = lpFeelpbalance.Add(lpFee)
 				usersLpBalanceInPool[moduleInfo.LpFeePkScript] = lpFeelpbalance
+				// set update flag
+				moduleInfo.LPTokenUsersBalanceUpdatedMap[poolPair+moduleInfo.LpFeePkScript] = struct{}{}
 				// lpFee-lp-balance
 				lpFeelpsBalance, ok := moduleInfo.UsersLPTokenBalanceMap[moduleInfo.LpFeePkScript]
 				if !ok {
