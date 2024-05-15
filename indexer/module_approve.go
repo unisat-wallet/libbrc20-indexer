@@ -99,6 +99,8 @@ func (g *BRC20ModuleIndexer) ProcessApprove(data *model.InscriptionBRC20Data, ap
 	tokenBalance := moduleInfo.GetUserTokenBalance(approveInfo.Tick, receiverPkScript)
 
 	// set from
+	fromTokenBalance.UpdateHeight = g.BestHeight
+
 	fromTokenBalance.ApproveableBalance = fromTokenBalance.ApproveableBalance.Sub(approveInfo.Amount)
 	delete(fromTokenBalance.ValidApproveMap, data.CreateIdxKey)
 
@@ -106,6 +108,7 @@ func (g *BRC20ModuleIndexer) ProcessApprove(data *model.InscriptionBRC20Data, ap
 	fromTokenBalance.History = append(fromTokenBalance.History, fromHistory)
 
 	// set to
+	tokenBalance.UpdateHeight = g.BestHeight
 	if data.BlockTime > 0 {
 		tokenBalance.SwapAccountBalanceSafe = tokenBalance.SwapAccountBalanceSafe.Add(approveInfo.Amount)
 	}
@@ -194,6 +197,7 @@ func (g *BRC20ModuleIndexer) ProcessInscribeApprove(data *model.InscriptionBRC20
 		}
 		moduleTokenBalance.ValidApproveMap[data.CreateIdxKey] = data
 
+		moduleTokenBalance.UpdateHeight = g.BestHeight
 		// Update global approve lookup table
 		g.InscriptionsValidApproveMap[data.CreateIdxKey] = approveInfo
 

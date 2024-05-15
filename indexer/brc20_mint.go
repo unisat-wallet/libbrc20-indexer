@@ -85,6 +85,8 @@ func (g *BRC20ModuleIndexer) ProcessMint(data *model.InscriptionBRC20Data) error
 	}
 
 	// update tinfo
+	tokenInfo.UpdateHeight = data.Height
+
 	// minted
 	balanceMinted := decimal.NewDecimalCopy(amt)
 	if tinfo.TotalMinted.Add(amt).Cmp(tinfo.Max) > 0 {
@@ -117,6 +119,8 @@ func (g *BRC20ModuleIndexer) ProcessMint(data *model.InscriptionBRC20Data) error
 	mintInfo.Amount = balanceMinted
 
 	// update tokenBalance
+	tokenBalance.UpdateHeight = data.Height
+
 	if data.BlockTime > 0 {
 		tokenBalance.AvailableBalanceSafe = tokenBalance.AvailableBalanceSafe.Add(balanceMinted)
 	}

@@ -25,6 +25,8 @@ func (g *BRC20ModuleIndexer) ProcessCommitFunctionDecreaseApproval(moduleInfo *m
 	tokenBalance.SwapAccountBalance = tokenBalance.SwapAccountBalance.Sub(tokenAmt)
 	tokenBalance.AvailableBalance = tokenBalance.AvailableBalance.Add(tokenAmt)
 
+	tokenBalance.UpdateHeight = g.BestHeight
+
 	log.Printf("pool decreaseApproval [%s] available: %s, swappable: %s", token, tokenBalance.AvailableBalance, tokenBalance.SwapAccountBalance)
 	return nil
 }

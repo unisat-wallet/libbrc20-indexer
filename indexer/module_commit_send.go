@@ -33,6 +33,9 @@ func (g *BRC20ModuleIndexer) ProcessCommitFunctionSend(moduleInfo *model.BRC20Mo
 		tokenBalanceFrom.SwapAccountBalance = tokenBalanceFrom.SwapAccountBalance.Sub(tokenAmt)
 		tokenBalanceTo.SwapAccountBalance = tokenBalanceTo.SwapAccountBalance.Add(tokenAmt)
 
+		tokenBalanceFrom.UpdateHeight = g.BestHeight
+		tokenBalanceTo.UpdateHeight = g.BestHeight
+
 		log.Printf("pool send [%s] swappable: %s -> %s", tokenOrPair, tokenBalanceFrom.SwapAccountBalance, tokenBalanceTo.SwapAccountBalance)
 	} else {
 		token0, token1, _ := utils.DecodeTokensFromSwapPair(tokenOrPair)

@@ -196,6 +196,8 @@ func (g *BRC20ModuleIndexer) ProcessConditionalApproveEvents(events []*model.Con
 		fromTokenBalance.CondApproveableBalance = fromTokenBalance.CondApproveableBalance.Sub(event.Amount)
 		// delete(fromTokenBalance.ValidConditionalApproveMap, data.CreateIdxKey)
 
+		fromTokenBalance.UpdateHeight = g.BestHeight
+
 		// fixme: history.Data
 		fromHistory := model.NewBRC20ModuleHistory(true, constant.BRC20_HISTORY_SWAP_TYPE_N_APPROVE_FROM, &event.FromData, &event.ToData, nil, true)
 		fromTokenBalance.History = append(fromTokenBalance.History, fromHistory)
@@ -205,6 +207,8 @@ func (g *BRC20ModuleIndexer) ProcessConditionalApproveEvents(events []*model.Con
 			tokenBalance.SwapAccountBalanceSafe = tokenBalance.SwapAccountBalanceSafe.Add(event.Amount)
 		}
 		tokenBalance.SwapAccountBalance = tokenBalance.SwapAccountBalance.Add(event.Amount)
+
+		tokenBalance.UpdateHeight = g.BestHeight
 
 		// fixme: history.Data
 		toHistory := model.NewBRC20ModuleHistory(true, constant.BRC20_HISTORY_SWAP_TYPE_N_APPROVE_TO, &event.FromData, &event.ToData, nil, true)
@@ -220,6 +224,7 @@ func (g *BRC20ModuleIndexer) ProcessConditionalApproveEvents(events []*model.Con
 	}
 
 	for _, event := range events {
+		event.ApproveInfo.UpdateHeight = g.BestHeight
 		event.ApproveInfo.Balance = event.Balance
 	}
 	return nil
@@ -270,6 +275,8 @@ func (g *BRC20ModuleIndexer) ProcessInscribeConditionalApprove(data *model.Inscr
 	condApproveInfo := &model.InscriptionBRC20SwapConditionalApproveInfo{
 		Data: data,
 	}
+	condApproveInfo.UpdateHeight = g.BestHeight
+
 	condApproveInfo.Module = body.Module
 	condApproveInfo.Tick = tokenInfo.Ticker
 	condApproveInfo.Amount = balanceCondApprove
@@ -302,6 +309,8 @@ func (g *BRC20ModuleIndexer) ProcessInscribeConditionalApprove(data *model.Inscr
 			moduleTokenBalance.ValidConditionalApproveMap = make(map[string]*model.InscriptionBRC20Data, 1)
 		}
 		moduleTokenBalance.ValidConditionalApproveMap[data.CreateIdxKey] = data
+
+		moduleTokenBalance.UpdateHeight = g.BestHeight
 
 		// Update global approve lookup table
 		g.InscriptionsValidConditionalApproveMap[data.CreateIdxKey] = condApproveInfo

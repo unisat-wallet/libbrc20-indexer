@@ -148,6 +148,10 @@ func (g *BRC20ModuleIndexer) ProcessDeploy(data *model.InscriptionBRC20Data) err
 		// all history
 		g.AllHistory = append(g.AllHistory, history)
 	}
+
+	// mark update
+	tokenInfo.UpdateHeight = data.Height
+
 	// init user tokens
 	var userTokens map[string]*model.BRC20TokenBalance
 	if tokens, ok := g.UserTokensBalanceData[string(data.PkScript)]; !ok {

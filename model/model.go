@@ -169,6 +169,8 @@ func (body *InscriptionBRC20DeployContent) Unmarshal(contentBody []byte) (err er
 
 // all ticker (state and history)
 type BRC20TokenInfo struct {
+	UpdateHeight uint32
+
 	Ticker string
 	Deploy *InscriptionBRC20TickInfo
 
@@ -306,6 +308,8 @@ type BRC20UserHistory struct {
 
 // state of address for each tick, (balance and history)
 type BRC20TokenBalance struct {
+	UpdateHeight uint32
+
 	Ticker               string
 	PkScript             string
 	AvailableBalance     *decimal.Decimal

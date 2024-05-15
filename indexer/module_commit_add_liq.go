@@ -135,6 +135,10 @@ func (g *BRC20ModuleIndexer) ProcessCommitFunctionAddLiquidity(moduleInfo *model
 	// User Real-time Balance Update
 	token0Balance.SwapAccountBalance = token0Balance.SwapAccountBalance.Sub(token0Amt)
 	token1Balance.SwapAccountBalance = token1Balance.SwapAccountBalance.Sub(token1Amt)
+
+	token0Balance.UpdateHeight = g.BestHeight
+	token1Balance.UpdateHeight = g.BestHeight
+
 	// fixme: User safety balance update
 
 	// lp balance update
@@ -168,6 +172,8 @@ func (g *BRC20ModuleIndexer) ProcessCommitFunctionAddLiquidity(moduleInfo *model
 	pool.TickBalance[token0Idx] = pool.TickBalance[token0Idx].Add(token0Amt)
 	pool.TickBalance[token1Idx] = pool.TickBalance[token1Idx].Add(token1Amt)
 	pool.LpBalance = pool.LpBalance.Add(lpForPool)
+
+	pool.UpdateHeight = g.BestHeight
 
 	// update lastRootK
 	pool.LastRootK = pool.TickBalance[token0Idx].Mul(pool.TickBalance[token1Idx]).Sqrt()

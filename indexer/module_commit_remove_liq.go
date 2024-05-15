@@ -129,7 +129,13 @@ func (g *BRC20ModuleIndexer) ProcessCommitFunctionRemoveLiquidity(moduleInfo *mo
 	token0Balance.SwapAccountBalance = token0Balance.SwapAccountBalance.Add(amt0)
 	token1Balance.SwapAccountBalance = token1Balance.SwapAccountBalance.Add(amt1)
 
+	// update at height
+	token0Balance.UpdateHeight = g.BestHeight
+	token1Balance.UpdateHeight = g.BestHeight
+	pool.UpdateHeight = g.BestHeight
+
 	pool.LpBalance = pool.LpBalance.Sub(tokenLpAmt) // fixme
+
 	// Deduct token balance in the pool
 	pool.TickBalance[token0Idx] = pool.TickBalance[token0Idx].Sub(amt0)
 	pool.TickBalance[token1Idx] = pool.TickBalance[token1Idx].Sub(amt1)

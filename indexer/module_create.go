@@ -130,6 +130,8 @@ func (g *BRC20ModuleIndexer) ProcessCreateModule(data *model.InscriptionBRC20Dat
 		ConditionalApproveStateBalanceDataMap: make(map[string]*model.BRC20ModuleConditionalApproveStateBalance, 0),
 	}
 
+	m.UpdateHeight = data.Height
+
 	// deployInfo := model.NewInscriptionBRC20SwapInfo(data)
 	// deployInfo.Module = inscriptionId
 

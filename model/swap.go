@@ -195,6 +195,8 @@ func NewConditionalApproveEvent(senderPkScript, receiverPkScript string, amount,
 
 // module state
 type BRC20ModuleSwapInfo struct {
+	UpdateHeight uint32
+
 	ID                string // module id
 	Name              string // module name
 	DeployerPkScript  string // deployer
@@ -602,6 +604,8 @@ func (moduleInfo *BRC20ModuleSwapInfo) GenerateApproveEventsByApprove(owner stri
 
 // state of address for each tick, (balance and history)
 type BRC20ModuleTokenBalance struct {
+	UpdateHeight uint32
+
 	Tick     string
 	PkScript string
 
@@ -701,6 +705,8 @@ func (in *BRC20ModuleTokenBalance) CherryPick() *BRC20ModuleTokenBalance {
 
 // state of address for each tick, (balance and history)
 type BRC20ModulePoolTotalBalance struct {
+	UpdateHeight uint32
+
 	Tick        [2]string
 	TickBalance [2]*decimal.Decimal
 	LpBalance   *decimal.Decimal
@@ -745,6 +751,8 @@ type InscriptionBRC20SwapInfo struct {
 }
 
 type InscriptionBRC20SwapConditionalApproveInfo struct {
+	UpdateHeight uint32
+
 	Module            string
 	Tick              string
 	Amount            *decimal.Decimal // current amt
