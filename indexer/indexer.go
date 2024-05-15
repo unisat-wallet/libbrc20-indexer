@@ -208,10 +208,8 @@ func (g *BRC20ModuleIndexer) ProcessUpdateLatestBRC20Loop(brc20Datas, brc20Datas
 		len(g.InscriptionsValidCommitMap),
 		len(g.InscriptionsInvalidCommitMap),
 	)
-
 }
 
-// ProcessUpdateLatestBRC20Init
 func (g *BRC20ModuleIndexer) Init() {
 	g.initBRC20()
 	g.initModule()

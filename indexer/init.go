@@ -26,8 +26,8 @@ type BRC20ModuleIndexer struct {
 	UserAllHistory map[string]*model.BRC20UserHistory
 
 	InscriptionsTickerInfoMap     map[string]*model.BRC20TokenInfo
-	UserTokensBalanceData         map[string]map[string]*model.BRC20TokenBalance
-	TokenUsersBalanceData         map[string]map[string]*model.BRC20TokenBalance
+	UserTokensBalanceData         map[string]map[string]*model.BRC20TokenBalance // [address][ticker]balance
+	TokenUsersBalanceData         map[string]map[string]*model.BRC20TokenBalance // [ticker][address]balance
 	InscriptionsValidBRC20DataMap map[string]*model.InscriptionBRC20InfoResp
 
 	// inner valid transfer
