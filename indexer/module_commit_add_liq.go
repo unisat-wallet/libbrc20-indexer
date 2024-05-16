@@ -4,17 +4,22 @@ import (
 	"errors"
 	"log"
 
+	"github.com/unisat-wallet/libbrc20-indexer/conf"
 	"github.com/unisat-wallet/libbrc20-indexer/constant"
 	"github.com/unisat-wallet/libbrc20-indexer/decimal"
 	"github.com/unisat-wallet/libbrc20-indexer/model"
 	"github.com/unisat-wallet/libbrc20-indexer/utils"
 )
 
-func (g *BRC20ModuleIndexer) ProcessCommitFunctionAddLiquidity(moduleInfo *model.BRC20ModuleSwapInfo, f *model.SwapFunctionData) error {
-	token0, token1, err := utils.DecodeTokensFromSwapPair(f.Params[0])
-	if err != nil {
-		return errors.New("func: addLiq poolPair invalid")
+func (g *BRC20ModuleIndexer) ProcessCommitFunctionAddLiquidity(moduleInfo *model.BRC20ModuleSwapInfo, f *model.SwapFunctionData) (err error) {
+	token0, token1 := f.Params[0], f.Params[1]
+	if g.BestHeight < conf.ENABLE_SWAP_WITHDRAW_HEIGHT {
+		token0, token1, err = utils.DecodeTokensFromSwapPair(f.Params[0])
+		if err != nil {
+			return errors.New("func: addLiq poolPair invalid")
+		}
 	}
+
 	poolPair := GetLowerInnerPairNameByToken(token0, token1)
 	pool, ok := moduleInfo.SwapPoolTotalBalanceDataMap[poolPair]
 	if !ok {
@@ -29,16 +34,20 @@ func (g *BRC20ModuleIndexer) ProcessCommitFunctionAddLiquidity(moduleInfo *model
 	// log.Printf("[%s] pool before addliq [%s] %s: %s, %s: %s, lp: %s", moduleInfo.ID, poolPair, pool.Tick[0], pool.TickBalance[0], pool.Tick[1], pool.TickBalance[1], pool.LpBalance)
 	log.Printf("pool addliq params: %v", f.Params)
 
-	token0AmtStr := f.Params[1]
-	token1AmtStr := f.Params[2]
-	tokenLpAmtStr := f.Params[3]
+	offset := 0
+	if g.BestHeight >= conf.ENABLE_SWAP_WITHDRAW_HEIGHT {
+		offset = 1
+	}
+	token0AmtStr := f.Params[1+offset]
+	token1AmtStr := f.Params[2+offset]
+	tokenLpAmtStr := f.Params[3+offset]
 
 	token0Amt, _ := g.CheckTickVerify(token0, token0AmtStr)
 	token1Amt, _ := g.CheckTickVerify(token1, token1AmtStr)
 	tokenLpAmt, _ := decimal.NewDecimalFromString(tokenLpAmtStr, 18)
 
 	// LP Balance Slippage Check
-	slippageAmtStr := f.Params[4]
+	slippageAmtStr := f.Params[4+offset]
 	slippageAmt, _ := decimal.NewDecimalFromString(slippageAmtStr, 3)
 
 	var token0Idx, token1Idx int

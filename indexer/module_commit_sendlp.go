@@ -15,10 +15,7 @@ func (g *BRC20ModuleIndexer) ProcessCommitFunctionSendLp(moduleInfo *model.BRC20
 	addressTo := f.Params[0]
 	pkScriptTo, _ := utils.GetPkScriptByAddress(addressTo, conf.GlobalNetParams)
 
-	tokenOrPair := f.Params[1]
-	tokenAmtStr := f.Params[2]
-
-	token0, token1, _ := utils.DecodeTokensFromSwapPair(tokenOrPair)
+	token0, token1 := f.Params[1], f.Params[2]
 	poolPair := GetLowerInnerPairNameByToken(token0, token1)
 	if _, ok := moduleInfo.SwapPoolTotalBalanceDataMap[poolPair]; !ok {
 		return errors.New("sendlp: pool invalid")
@@ -40,6 +37,7 @@ func (g *BRC20ModuleIndexer) ProcessCommitFunctionSendLp(moduleInfo *model.BRC20
 		return errors.New("sendlp: user's tokenLp balance miss match")
 	}
 
+	tokenAmtStr := f.Params[3]
 	tokenLpAmt, _ := CheckAmountVerify(tokenAmtStr, 18)
 	// Check if the user's lp balance is sufficient.
 	if userbalanceFrom.Cmp(tokenLpAmt) < 0 {
@@ -70,7 +68,7 @@ func (g *BRC20ModuleIndexer) ProcessCommitFunctionSendLp(moduleInfo *model.BRC20
 	}
 	lpsBalanceTo[poolPair] = lpBalanceTo
 
-	log.Printf("pool sendlp [%s] lp: %s -> %s", tokenOrPair, lpBalanceFrom, lpBalanceTo)
+	log.Printf("pool sendlp [%s] lp: %s -> %s", poolPair, lpBalanceFrom, lpBalanceTo)
 
 	return nil
 }

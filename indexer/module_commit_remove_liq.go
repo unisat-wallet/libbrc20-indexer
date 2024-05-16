@@ -5,16 +5,19 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/unisat-wallet/libbrc20-indexer/conf"
 	"github.com/unisat-wallet/libbrc20-indexer/decimal"
 	"github.com/unisat-wallet/libbrc20-indexer/model"
 	"github.com/unisat-wallet/libbrc20-indexer/utils"
 )
 
-func (g *BRC20ModuleIndexer) ProcessCommitFunctionRemoveLiquidity(moduleInfo *model.BRC20ModuleSwapInfo, f *model.SwapFunctionData) error {
-
-	token0, token1, err := utils.DecodeTokensFromSwapPair(f.Params[0])
-	if err != nil {
-		return errors.New("func: removeLiq poolPair invalid")
+func (g *BRC20ModuleIndexer) ProcessCommitFunctionRemoveLiquidity(moduleInfo *model.BRC20ModuleSwapInfo, f *model.SwapFunctionData) (err error) {
+	token0, token1 := f.Params[0], f.Params[1]
+	if g.BestHeight < conf.ENABLE_SWAP_WITHDRAW_HEIGHT {
+		token0, token1, err = utils.DecodeTokensFromSwapPair(f.Params[0])
+		if err != nil {
+			return errors.New("func: removeLiq poolPair invalid")
+		}
 	}
 	poolPair := GetLowerInnerPairNameByToken(token0, token1)
 	pool, ok := moduleInfo.SwapPoolTotalBalanceDataMap[poolPair]
@@ -33,16 +36,21 @@ func (g *BRC20ModuleIndexer) ProcessCommitFunctionRemoveLiquidity(moduleInfo *mo
 	// log.Printf("[%s] pool before removeliq [%s] %s: %s, %s: %s, lp: %s", moduleInfo.ID, poolPair, pool.Tick[0], pool.TickBalance[0], pool.Tick[1], pool.TickBalance[1], pool.LpBalance)
 	log.Printf("pool removeliq params: %v", f.Params)
 
-	tokenLpAmtStr := f.Params[1]
-	token0AmtStr := f.Params[2]
-	token1AmtStr := f.Params[3]
+	offset := 0
+	if g.BestHeight >= conf.ENABLE_SWAP_WITHDRAW_HEIGHT {
+		offset = 1
+	}
+
+	tokenLpAmtStr := f.Params[1+offset]
+	token0AmtStr := f.Params[2+offset]
+	token1AmtStr := f.Params[3+offset]
 
 	token0Amt, _ := g.CheckTickVerify(token0, token0AmtStr)
 	token1Amt, _ := g.CheckTickVerify(token1, token1AmtStr)
 	tokenLpAmt, _ := decimal.NewDecimalFromString(tokenLpAmtStr, 18)
 
 	// LP Balance Slippage Check
-	slippageAmtStr := f.Params[4]
+	slippageAmtStr := f.Params[4+offset]
 	slippageAmt, _ := decimal.NewDecimalFromString(slippageAmtStr, 3)
 
 	var token0Idx, token1Idx int
