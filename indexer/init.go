@@ -178,6 +178,30 @@ func (g *BRC20ModuleIndexer) initModule() {
 	g.InscriptionsValidCommitMapById = make(map[string]*model.InscriptionBRC20Data, 0) // inner valid commit
 }
 
+func (g *BRC20ModuleIndexer) GetUserTokenBalance(ticker, userPkScript string) (tokenBalance *model.BRC20TokenBalance) {
+	uniqueLowerTicker := strings.ToLower(ticker)
+	// get user's tokens to update
+	var userTokens map[string]*model.BRC20TokenBalance
+	if tokens, ok := g.UserTokensBalanceData[userPkScript]; !ok {
+		userTokens = make(map[string]*model.BRC20TokenBalance, 0)
+		g.UserTokensBalanceData[userPkScript] = userTokens
+	} else {
+		userTokens = tokens
+	}
+	// get tokenBalance to update
+	if tb, ok := userTokens[uniqueLowerTicker]; !ok {
+		tokenBalance = &model.BRC20TokenBalance{Ticker: ticker, PkScript: userPkScript}
+		userTokens[uniqueLowerTicker] = tokenBalance
+	} else {
+		tokenBalance = tb
+	}
+	// set token's users
+	tokenUsers := g.TokenUsersBalanceData[uniqueLowerTicker]
+	tokenUsers[userPkScript] = tokenBalance
+
+	return tokenBalance
+}
+
 func (g *BRC20ModuleIndexer) GenerateApproveEventsByTransfer(inscription, tick, from, to string, amt *decimal.Decimal) (events []*model.ConditionalApproveEvent) {
 	transStateStatic := &model.TransferStateForConditionalApprove{
 		Tick:          tick,

@@ -45,24 +45,7 @@ func (g *BRC20ModuleIndexer) ProcessMint(data *model.InscriptionBRC20Data) error
 	}
 
 	// get user's tokens to update
-	var userTokens map[string]*model.BRC20TokenBalance
-	if tokens, ok := g.UserTokensBalanceData[string(data.PkScript)]; !ok {
-		userTokens = make(map[string]*model.BRC20TokenBalance, 0)
-		g.UserTokensBalanceData[string(data.PkScript)] = userTokens
-	} else {
-		userTokens = tokens
-	}
-	// get tokenBalance to update
-	var tokenBalance *model.BRC20TokenBalance
-	if token, ok := userTokens[uniqueLowerTicker]; !ok {
-		tokenBalance = &model.BRC20TokenBalance{Ticker: tokenInfo.Ticker, PkScript: data.PkScript}
-		userTokens[uniqueLowerTicker] = tokenBalance
-	} else {
-		tokenBalance = token
-	}
-	// init token's users
-	tokenUsers := g.TokenUsersBalanceData[uniqueLowerTicker]
-	tokenUsers[string(data.PkScript)] = tokenBalance
+	tokenBalance := g.GetUserTokenBalance(tokenInfo.Ticker, string(data.PkScript))
 
 	body.BRC20Tick = tokenInfo.Ticker
 	mintInfo := model.NewInscriptionBRC20TickInfo(body.BRC20Tick, body.Operation, data)

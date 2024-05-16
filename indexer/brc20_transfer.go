@@ -107,27 +107,6 @@ func (g *BRC20ModuleIndexer) ProcessTransfer(data *model.InscriptionBRC20Data, t
 		return errors.New("transfer, invalid transfer")
 	}
 
-	// to
-	// get user's tokens to update
-	var userTokens map[string]*model.BRC20TokenBalance
-	if tokens, ok := g.UserTokensBalanceData[receiverPkScript]; !ok {
-		userTokens = make(map[string]*model.BRC20TokenBalance, 0)
-		g.UserTokensBalanceData[receiverPkScript] = userTokens
-	} else {
-		userTokens = tokens
-	}
-	// get tokenBalance to update
-	var tokenBalance *model.BRC20TokenBalance
-	if token, ok := userTokens[uniqueLowerTicker]; !ok {
-		tokenBalance = &model.BRC20TokenBalance{Ticker: transferInfo.Tick, PkScript: receiverPkScript}
-		userTokens[uniqueLowerTicker] = tokenBalance
-	} else {
-		tokenBalance = token
-	}
-	// set token's users
-	tokenUsers := g.TokenUsersBalanceData[uniqueLowerTicker]
-	tokenUsers[receiverPkScript] = tokenBalance
-
 	// set from
 	fromTokenBalance.UpdateHeight = data.Height
 
@@ -144,6 +123,10 @@ func (g *BRC20ModuleIndexer) ProcessTransfer(data *model.InscriptionBRC20Data, t
 		userHistoryFrom := g.GetBRC20HistoryByUser(senderPkScript)
 		userHistoryFrom.History = append(userHistoryFrom.History, fromHistory)
 	}
+
+	// to
+	// get user's tokens to update
+	tokenBalance := g.GetUserTokenBalance(transferInfo.Tick, receiverPkScript)
 	// set to
 	tokenBalance.UpdateHeight = data.Height
 
