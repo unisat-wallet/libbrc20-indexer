@@ -231,6 +231,10 @@ func (g *BRC20ModuleIndexer) ProcessConditionalApproveEvents(events []*model.Con
 }
 
 func (g *BRC20ModuleIndexer) ProcessInscribeConditionalApprove(data *model.InscriptionBRC20Data) error {
+	if data.Height >= conf.ENABLE_SWAP_WITHDRAW_HEIGHT {
+		return errors.New("invalid operation")
+	}
+
 	var body model.InscriptionBRC20ModuleSwapApproveContent
 	if err := json.Unmarshal(data.ContentBody, &body); err != nil {
 		log.Printf("parse approve json failed. txid: %s",

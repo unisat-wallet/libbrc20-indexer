@@ -5,6 +5,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/unisat-wallet/libbrc20-indexer/conf"
 	"github.com/unisat-wallet/libbrc20-indexer/constant"
 	"github.com/unisat-wallet/libbrc20-indexer/decimal"
 	"github.com/unisat-wallet/libbrc20-indexer/model"
@@ -164,12 +165,13 @@ func (g *BRC20ModuleIndexer) ProcessTransfer(data *model.InscriptionBRC20Data, t
 		g.ThisTxId = data.TxId
 	}
 
-	inscriptionId := transferInfo.Meta.GetInscriptionId()
-	events := g.GenerateApproveEventsByTransfer(inscriptionId, transferInfo.Tick, senderPkScript, receiverPkScript, transferInfo.Amount)
-	if err := g.ProcessConditionalApproveEvents(events); err != nil {
-		return err
+	if data.Height < conf.ENABLE_SWAP_WITHDRAW_HEIGHT {
+		inscriptionId := transferInfo.Meta.GetInscriptionId()
+		events := g.GenerateApproveEventsByTransfer(inscriptionId, transferInfo.Tick, senderPkScript, receiverPkScript, transferInfo.Amount)
+		if err := g.ProcessConditionalApproveEvents(events); err != nil {
+			return err
+		}
 	}
-
 	////////////////////////////////////////////////////////////////
 	// module deposit
 	moduleId, ok := utils.GetModuleFromScript([]byte(receiverPkScript))

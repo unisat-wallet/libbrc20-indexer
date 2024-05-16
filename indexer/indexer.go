@@ -42,14 +42,17 @@ func (g *BRC20ModuleIndexer) ProcessUpdateLatestBRC20Loop(brc20Datas, brc20Datas
 
 			// is sending transfer
 			if data.IsTransfer {
-				// module conditional approve
-				if condApproveInfo, isInvalid := g.GetConditionalApproveInfoByKey(data.CreateIdxKey); condApproveInfo != nil {
-					if err := g.ProcessConditionalApprove(data, condApproveInfo, isInvalid); err != nil {
-						log.Printf("process conditional approve move failed: %s", err)
-					} else {
-						g.Durty = true
+
+				if data.Height < conf.ENABLE_SWAP_WITHDRAW_HEIGHT {
+					// module conditional approve
+					if condApproveInfo, isInvalid := g.GetConditionalApproveInfoByKey(data.CreateIdxKey); condApproveInfo != nil {
+						if err := g.ProcessConditionalApprove(data, condApproveInfo, isInvalid); err != nil {
+							log.Printf("process conditional approve move failed: %s", err)
+						} else {
+							g.Durty = true
+						}
+						break
 					}
-					break
 				}
 
 				// not first move
