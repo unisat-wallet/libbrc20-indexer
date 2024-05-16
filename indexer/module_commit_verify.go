@@ -516,6 +516,9 @@ func (g *BRC20ModuleIndexer) ProcessCommitVerify(commitId string, body *model.In
 		// gas fee
 		if gasPriceAmt.Sign() > 0 {
 			size := eachFuntionSize[idx]
+			if g.BestHeight >= conf.ENABLE_SWAP_WITHDRAW_HEIGHT {
+				size = 1
+			}
 			gasAmt := gasPriceAmt.Mul(decimal.NewDecimal(size, 3))
 			// log.Printf("process commit[%d] size: %d, gas fee: %s, module[%s]", idx, size, gasAmt.String(), body.Module)
 			if err := g.ProcessCommitFunctionGasFee(moduleInfo, f.PkScript, gasAmt); err != nil { // has update
