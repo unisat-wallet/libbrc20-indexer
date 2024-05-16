@@ -640,6 +640,11 @@ func (g *BRC20ModuleIndexer) InitCherryPickFilter(body *model.InscriptionBRC20Mo
 
 	pickTokensTick[moduleInfo.GasTick] = true
 
+	paramOffset := 0
+	if g.BestHeight >= conf.ENABLE_SWAP_WITHDRAW_HEIGHT {
+		paramOffset = 1
+	}
+
 	for idx, f := range body.Data {
 		if pkScript, err := utils.GetPkScriptByAddress(f.Address, conf.GlobalNetParams); err != nil {
 			return idx, errors.New("addr invalid")
@@ -666,15 +671,17 @@ func (g *BRC20ModuleIndexer) InitCherryPickFilter(body *model.InscriptionBRC20Mo
 			pickTokensTick[token1] = true
 
 		} else if f.Function == constant.BRC20_SWAP_FUNCTION_ADD_LIQ {
-			if len(f.Params) != 5 {
+			if len(f.Params) != 5+paramOffset {
 				return idx, errors.New("func: addLiq params invalid")
 			}
 
-			token0, token1, err := utils.DecodeTokensFromSwapPair(f.Params[0])
-			if err != nil {
-				return idx, errors.New("func: addLiq poolPair invalid")
+			token0, token1 := f.Params[0], f.Params[1]
+			if g.BestHeight < conf.ENABLE_SWAP_WITHDRAW_HEIGHT {
+				token0, token1, err = utils.DecodeTokensFromSwapPair(f.Params[0])
+				if err != nil {
+					return idx, errors.New("func: addLiq poolPair invalid")
+				}
 			}
-
 			// pair
 			poolPair := GetLowerInnerPairNameByToken(token0, token1)
 			pickPoolsPair[poolPair] = true
@@ -686,15 +693,17 @@ func (g *BRC20ModuleIndexer) InitCherryPickFilter(body *model.InscriptionBRC20Mo
 			pickTokensTick[token1] = true
 
 		} else if f.Function == constant.BRC20_SWAP_FUNCTION_REMOVE_LIQ {
-			if len(f.Params) != 5 {
+			if len(f.Params) != 5+paramOffset {
 				return idx, errors.New("func: removeLiq params invalid")
 			}
 
-			token0, token1, err := utils.DecodeTokensFromSwapPair(f.Params[0])
-			if err != nil {
-				return idx, errors.New("func: removeLiq poolPair invalid")
+			token0, token1 := f.Params[0], f.Params[1]
+			if g.BestHeight < conf.ENABLE_SWAP_WITHDRAW_HEIGHT {
+				token0, token1, err = utils.DecodeTokensFromSwapPair(f.Params[0])
+				if err != nil {
+					return idx, errors.New("func: removeLiq poolPair invalid")
+				}
 			}
-
 			// pair
 			poolPair := GetLowerInnerPairNameByToken(token0, token1)
 			pickPoolsPair[poolPair] = true
@@ -706,15 +715,17 @@ func (g *BRC20ModuleIndexer) InitCherryPickFilter(body *model.InscriptionBRC20Mo
 			pickTokensTick[token1] = true
 
 		} else if f.Function == constant.BRC20_SWAP_FUNCTION_SWAP {
-			if len(f.Params) != 6 {
+			if len(f.Params) != 6+paramOffset {
 				return idx, errors.New("func: swap params invalid")
 			}
 
-			token0, token1, err := utils.DecodeTokensFromSwapPair(f.Params[0])
-			if err != nil {
-				return idx, errors.New("func: swap poolPair invalid")
+			token0, token1 := f.Params[0], f.Params[1]
+			if g.BestHeight < conf.ENABLE_SWAP_WITHDRAW_HEIGHT {
+				token0, token1, err = utils.DecodeTokensFromSwapPair(f.Params[0])
+				if err != nil {
+					return idx, errors.New("func: swap poolPair invalid")
+				}
 			}
-
 			// pair
 			poolPair := GetLowerInnerPairNameByToken(token0, token1)
 			pickPoolsPair[poolPair] = true
@@ -746,25 +757,31 @@ func (g *BRC20ModuleIndexer) InitCherryPickFilter(body *model.InscriptionBRC20Mo
 				pickUsersPkScript[string(pk)] = true
 			}
 
-			tokenOrPair := f.Params[1]
-			if len(tokenOrPair) == 4 {
-				token0 := strings.ToLower(tokenOrPair)
-				pickTokensTick[token0] = true
+			token0 := f.Params[1]
+			token0 = strings.ToLower(token0)
+			pickTokensTick[token0] = true
 
-			} else {
-				if token0, token1, err := utils.DecodeTokensFromSwapPair(tokenOrPair); err != nil {
-					return idx, errors.New("func: send lp invalid")
-				} else {
-					poolPair := GetLowerInnerPairNameByToken(token0, token1)
-					pickPoolsPair[poolPair] = true
-
-					// tick
-					token0 = strings.ToLower(token0)
-					token1 = strings.ToLower(token1)
-					pickTokensTick[token0] = true
-					pickTokensTick[token1] = true
-				}
+		} else if f.Function == constant.BRC20_SWAP_FUNCTION_SENDLP {
+			if len(f.Params) != 4 {
+				return idx, errors.New("func: send params invalid")
 			}
+
+			addressTo := f.Params[0]
+			if pk, err := utils.GetPkScriptByAddress(addressTo, conf.GlobalNetParams); err != nil {
+				return idx, errors.New("send addr invalid")
+			} else {
+				pickUsersPkScript[string(pk)] = true
+			}
+
+			token0, token1 := f.Params[1], f.Params[2]
+			poolPair := GetLowerInnerPairNameByToken(token0, token1)
+			pickPoolsPair[poolPair] = true
+
+			// tick
+			token0 = strings.ToLower(token0)
+			token1 = strings.ToLower(token1)
+			pickTokensTick[token0] = true
+			pickTokensTick[token1] = true
 
 		} else {
 			log.Printf("ProcessInscribeCommit commit[%d] invalid function: %s. id: %s", idx, f.Function, f.ID)
