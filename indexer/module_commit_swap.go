@@ -25,7 +25,6 @@ func (g *BRC20ModuleIndexer) ProcessCommitFunctionSwap(moduleInfo *model.BRC20Mo
 		return errors.New("func: swap poolPair invalid")
 	}
 	poolPair := GetLowerInnerPairNameByToken(token0, token1)
-
 	pool, ok := moduleInfo.SwapPoolTotalBalanceDataMap[poolPair]
 	if !ok {
 		return errors.New("swap: pool invalid")

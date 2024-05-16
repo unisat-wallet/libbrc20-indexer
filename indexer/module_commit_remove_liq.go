@@ -17,7 +17,6 @@ func (g *BRC20ModuleIndexer) ProcessCommitFunctionRemoveLiquidity(moduleInfo *mo
 		return errors.New("func: removeLiq poolPair invalid")
 	}
 	poolPair := GetLowerInnerPairNameByToken(token0, token1)
-
 	pool, ok := moduleInfo.SwapPoolTotalBalanceDataMap[poolPair]
 	if !ok {
 		return errors.New("removeLiq: pool invalid")

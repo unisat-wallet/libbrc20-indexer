@@ -139,17 +139,10 @@ func GetLowerInnerPairNameByToken(token0, token1 string) (poolPair string) {
 	token1 = strings.ToLower(token1)
 
 	if token0 > token1 {
-		poolPair = fmt.Sprintf("%s/%s", token1, token0)
+		poolPair = fmt.Sprintf("%s%s%s", string([]byte{uint8(len(token1))}), token1, token0)
 	} else {
-		poolPair = fmt.Sprintf("%s/%s", token0, token1)
+		poolPair = fmt.Sprintf("%s%s%s", string([]byte{uint8(len(token0))}), token0, token1)
 	}
-	return poolPair
-}
-
-func GetLowerPairNameByToken(token0, token1 string) (poolPair string) {
-	token0 = strings.ToLower(token0)
-	token1 = strings.ToLower(token1)
-	poolPair = fmt.Sprintf("%s/%s", token0, token1)
 	return poolPair
 }
 

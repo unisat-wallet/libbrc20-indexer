@@ -16,7 +16,6 @@ func (g *BRC20ModuleIndexer) ProcessCommitFunctionAddLiquidity(moduleInfo *model
 		return errors.New("func: addLiq poolPair invalid")
 	}
 	poolPair := GetLowerInnerPairNameByToken(token0, token1)
-
 	pool, ok := moduleInfo.SwapPoolTotalBalanceDataMap[poolPair]
 	if !ok {
 		return errors.New("addLiq: pool invalid")
