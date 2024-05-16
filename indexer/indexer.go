@@ -83,6 +83,19 @@ func (g *BRC20ModuleIndexer) ProcessUpdateLatestBRC20Loop(brc20Datas, brc20Datas
 					break
 				}
 
+				// module withdraw
+				if withdrawInfo, isInvalid := g.GetWithdrawInfoByKey(data.CreateIdxKey); withdrawInfo != nil {
+					g.InscriptionsWithdrawRemoveMap[data.CreateIdxKey] = data.Height
+					g.Durty = true
+
+					if err := g.ProcessWithdraw(data, withdrawInfo, isInvalid); err != nil {
+						log.Printf("process withdraw move failed: %s", err)
+					} else {
+						g.Durty = true
+					}
+					break
+				}
+
 				// module commit
 				if commitFrom, isInvalid := g.GetCommitInfoByKey(data.CreateIdxKey); commitFrom != nil {
 					g.InscriptionsCommitRemoveMap[data.CreateIdxKey] = data.Height

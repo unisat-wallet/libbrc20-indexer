@@ -178,6 +178,7 @@ type BRC20TokenInfo struct {
 	HistoryMint             []uint32
 	HistoryInscribeTransfer []uint32
 	HistoryTransfer         []uint32
+	HistoryWithdraw         []uint32 // fixme
 }
 
 type InscriptionBRC20TransferInfo struct {

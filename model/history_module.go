@@ -50,13 +50,19 @@ func NewBRC20ModuleHistory(isTransfer bool, historyType uint8, from, to *Inscrip
 	return history
 }
 
-// history
+// withdraw history
+type BRC20SwapHistoryWithdrawData struct {
+	Tick   string `json:"tick"`
+	Amount string `json:"amount"` // current amt
+}
+
+// approve history
 type BRC20SwapHistoryApproveData struct {
 	Tick   string `json:"tick"`
 	Amount string `json:"amount"` // current amt
 }
 
-// history
+// cond approve history
 type BRC20SwapHistoryCondApproveData struct {
 	Tick                  string `json:"tick"`
 	Amount                string `json:"amount"`      // current amt

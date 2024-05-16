@@ -10,4 +10,5 @@ var (
 	GlobalNetParams                          = &chaincfg.MainNetParams
 	TICKS_ENABLED                            = ""
 	ENABLE_SELF_MINT_HEIGHT           uint32 = 837090
+	ENABLE_SWAP_WITHDRAW_HEIGHT       uint32 = 847090 // fixme: dummy height
 )
