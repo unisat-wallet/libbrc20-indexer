@@ -148,6 +148,7 @@ const (
 	BRC20_SWAP_FUNCTION_REMOVE_LIQ        = "removeLiq"
 	BRC20_SWAP_FUNCTION_SWAP              = "swap"
 	BRC20_SWAP_FUNCTION_SEND              = "send"
+	BRC20_SWAP_FUNCTION_SENDLP            = "sendLp"
 	BRC20_SWAP_FUNCTION_DECREASE_APPROVAL = "decreaseApproval"
 )
 

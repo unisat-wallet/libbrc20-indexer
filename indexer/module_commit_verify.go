@@ -560,6 +560,12 @@ func (g *BRC20ModuleIndexer) ProcessCommitVerify(commitId string, body *model.In
 				log.Printf("process commit[%d] send failed: %s, module[%s]", idx, err, body.Module)
 				return idx, true, err
 			}
+
+		} else if f.Function == constant.BRC20_SWAP_FUNCTION_SENDLP {
+			if err := g.ProcessCommitFunctionSendLp(moduleInfo, f); err != nil {
+				log.Printf("process commit[%d] sendlp failed: %s, module[%s]", idx, err, body.Module)
+				return idx, true, err
+			}
 		}
 
 		// instant verify
