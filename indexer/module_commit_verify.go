@@ -271,6 +271,11 @@ func (g *BRC20ModuleIndexer) ProcessInscribeCommitPreVerify(body *model.Inscript
 		content += fmt.Sprintf("gas_price: %s\n", body.GasPrice)
 	}
 
+	paramOffset := 0
+	if g.BestHeight >= conf.ENABLE_SWAP_WITHDRAW_HEIGHT {
+		paramOffset = 1
+	}
+
 	// for previous id
 	functionsByAddressMap := make(map[string][]string)
 	for idx, f := range body.Data {
@@ -312,19 +317,22 @@ func (g *BRC20ModuleIndexer) ProcessInscribeCommitPreVerify(body *model.Inscript
 			// Check for duplicate pairs when the Commit inscription effect is applied.
 
 		} else if f.Function == constant.BRC20_SWAP_FUNCTION_ADD_LIQ {
-			if len(f.Params) != 5 {
+			if len(f.Params) != 5+paramOffset {
 				return idx, errors.New("func: addLiq params invalid")
 			}
 
-			token0, token1, err := utils.DecodeTokensFromSwapPair(f.Params[0])
-			if err != nil {
-				return idx, errors.New("func: addLiq poolPair invalid")
+			token0, token1 := f.Params[0], f.Params[1]
+			if g.BestHeight < conf.ENABLE_SWAP_WITHDRAW_HEIGHT {
+				token0, token1, err = utils.DecodeTokensFromSwapPair(f.Params[0])
+				if err != nil {
+					return idx, errors.New("func: addLiq poolPair invalid")
+				}
 			}
 
-			token0AmtStr := f.Params[1]
-			token1AmtStr := f.Params[2]
-			tokenLpAmtStr := f.Params[3]
-			slippage := f.Params[4]
+			token0AmtStr := f.Params[1+paramOffset]
+			token1AmtStr := f.Params[2+paramOffset]
+			tokenLpAmtStr := f.Params[3+paramOffset]
+			slippage := f.Params[4+paramOffset]
 
 			if _, ok := g.CheckTickVerify(token0, token0AmtStr); !ok {
 				return idx, errors.New("func: addLiq amt0 invalid")
@@ -343,22 +351,24 @@ func (g *BRC20ModuleIndexer) ProcessInscribeCommitPreVerify(body *model.Inscript
 			}
 
 		} else if f.Function == constant.BRC20_SWAP_FUNCTION_REMOVE_LIQ {
-			if len(f.Params) != 5 {
+			if len(f.Params) != 5+paramOffset {
 				return idx, errors.New("func: removeLiq params invalid")
 			}
 
-			token0, token1, err := utils.DecodeTokensFromSwapPair(f.Params[0])
-			if err != nil {
-				return idx, errors.New("func: removeLiq poolPair invalid")
+			token0, token1 := f.Params[0], f.Params[1]
+			if g.BestHeight < conf.ENABLE_SWAP_WITHDRAW_HEIGHT {
+				token0, token1, err = utils.DecodeTokensFromSwapPair(f.Params[0])
+				if err != nil {
+					return idx, errors.New("func: removeLiq poolPair invalid")
+				}
 			}
-
-			tokenLpAmtStr := f.Params[1]
-			token0AmtStr := f.Params[2]
-			token1AmtStr := f.Params[3]
-			slippage := f.Params[4]
+			tokenLpAmtStr := f.Params[1+paramOffset]
+			token0AmtStr := f.Params[2+paramOffset]
+			token1AmtStr := f.Params[3+paramOffset]
+			slippage := f.Params[4+paramOffset]
 
 			if _, ok := CheckAmountVerify(tokenLpAmtStr, 18); !ok {
-				return idx, errors.New(fmt.Sprintf("func: removeLiq amtLp invalid, %s", f.Params[1]))
+				return idx, errors.New(fmt.Sprintf("func: removeLiq amtLp invalid, %s/%s", token0, token1))
 			}
 
 			if _, ok := g.CheckTickVerify(token0, token0AmtStr); !ok {
@@ -374,46 +384,49 @@ func (g *BRC20ModuleIndexer) ProcessInscribeCommitPreVerify(body *model.Inscript
 			}
 
 		} else if f.Function == constant.BRC20_SWAP_FUNCTION_SWAP {
-			if len(f.Params) != 6 {
+			if len(f.Params) != 6+paramOffset {
 				return idx, errors.New("func: swap params invalid")
 			}
 
-			token0, token1, err := utils.DecodeTokensFromSwapPair(f.Params[0])
-			if err != nil {
-				return idx, errors.New("func: swap poolPair invalid")
+			token0, token1 := f.Params[0], f.Params[1]
+			if g.BestHeight < conf.ENABLE_SWAP_WITHDRAW_HEIGHT {
+				token0, token1, err = utils.DecodeTokensFromSwapPair(f.Params[0])
+				if err != nil {
+					return idx, errors.New("func: swap poolPair invalid")
+				}
 			}
 
 			// Check that the first parameter must be one of the token pairs.
-			if token := f.Params[1]; token != token0 && token != token1 {
+			if token := f.Params[1+paramOffset]; token != token0 && token != token1 {
 				return idx, errors.New("func: swap token invalid")
 			}
 
-			derection := f.Params[3]
+			derection := f.Params[3+paramOffset]
 			if derection != "exactIn" && derection != "exactOut" {
 				return idx, errors.New("func: swap derection invalid")
 			}
 
 			var tokenIn, tokenInAmtStr, tokenOut, tokenOutAmtStr string
 			if derection == "exactIn" {
-				tokenIn = f.Params[1]
-				tokenInAmtStr = f.Params[2]
+				tokenIn = f.Params[1+paramOffset]
+				tokenInAmtStr = f.Params[2+paramOffset]
 
 				if tokenIn == token0 {
 					tokenOut = token1
 				} else {
 					tokenOut = token0
 				}
-				tokenOutAmtStr = f.Params[4]
+				tokenOutAmtStr = f.Params[4+paramOffset]
 			} else if derection == "exactOut" {
-				tokenOut = f.Params[1]
-				tokenOutAmtStr = f.Params[2]
+				tokenOut = f.Params[1+paramOffset]
+				tokenOutAmtStr = f.Params[2+paramOffset]
 
 				if tokenOut == token0 {
 					tokenIn = token1
 				} else {
 					tokenIn = token0
 				}
-				tokenInAmtStr = f.Params[4]
+				tokenInAmtStr = f.Params[4+paramOffset]
 			}
 
 			if _, ok := g.CheckTickVerify(tokenIn, tokenInAmtStr); !ok {
@@ -424,7 +437,7 @@ func (g *BRC20ModuleIndexer) ProcessInscribeCommitPreVerify(body *model.Inscript
 				return idx, errors.New("func: swap amt1 invalid")
 			}
 
-			slippage := f.Params[5]
+			slippage := f.Params[5+paramOffset]
 			if _, ok := CheckAmountVerify(slippage, 3); !ok {
 				return idx, errors.New("func: swap slippage invalid")
 			}
@@ -451,19 +464,30 @@ func (g *BRC20ModuleIndexer) ProcessInscribeCommitPreVerify(body *model.Inscript
 				return idx, errors.New("send addr invalid")
 			}
 
-			tokenOrPair := f.Params[1]
+			token := f.Params[1]
 			tokenAmtStr := f.Params[2]
-			if len(tokenOrPair) == 4 {
-				if _, ok := g.CheckTickVerify(tokenOrPair, tokenAmtStr); !ok {
-					return idx, errors.New("func: send amt invalid")
-				}
-			} else {
-				if _, _, err := utils.DecodeTokensFromSwapPair(tokenOrPair); err != nil {
-					return idx, errors.New("func: send lp invalid")
-				}
-				if _, ok := CheckAmountVerify(tokenAmtStr, 18); !ok {
-					return idx, errors.New(fmt.Sprintf("func: send amtLp invalid, %s", tokenAmtStr))
-				}
+			if _, ok := g.CheckTickVerify(token, tokenAmtStr); !ok {
+				return idx, errors.New("func: send amt invalid")
+			}
+
+		} else if f.Function == constant.BRC20_SWAP_FUNCTION_SENDLP {
+			if len(f.Params) != 4 {
+				return idx, errors.New("func: send params invalid")
+			}
+
+			addressTo := f.Params[0]
+			if _, err := utils.GetPkScriptByAddress(addressTo, conf.GlobalNetParams); err != nil {
+				return idx, errors.New("send addr invalid")
+			}
+
+			token0, token1 := f.Params[1], f.Params[2]
+			tokenOrPair := GetLowerInnerPairNameByToken(token0, token1)
+			tokenAmtStr := f.Params[3]
+			if _, _, err := utils.DecodeTokensFromSwapPair(tokenOrPair); err != nil {
+				return idx, errors.New("func: send lp invalid")
+			}
+			if _, ok := CheckAmountVerify(tokenAmtStr, 18); !ok {
+				return idx, errors.New(fmt.Sprintf("func: send amtLp invalid, %s", tokenAmtStr))
 			}
 
 		} else {
