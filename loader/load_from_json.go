@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/unisat-wallet/libbrc20-indexer/model"
+	"github.com/unisat-wallet/libbrc20-indexer/utils"
 )
 
 func LoadBRC20InputJsonData(fname string) ([]*model.InscriptionBRC20Data, error) {
@@ -47,7 +48,7 @@ func LoadBRC20InputJsonData(fname string) ([]*model.InscriptionBRC20Data, error)
 		if err != nil {
 			return nil, err
 		}
-		data.TxId = string(txid)
+		data.TxId = string(utils.ReverseBytes([]byte(txid)))
 
 		idx, err := strconv.ParseUint(fields[2], 10, 32)
 		if err != nil {
@@ -86,10 +87,6 @@ func LoadBRC20InputJsonData(fname string) ([]*model.InscriptionBRC20Data, error)
 		data.InscriptionNumber = int64(inscriptionNumber)
 
 		data.ContentBody = []byte(fields[8])
-		// data.ContentBody, err = hex.DecodeString(fields[8])
-		// if err != nil {
-		// 	return nil, err
-		// }
 
 		createIdxKey, err := hex.DecodeString(fields[9])
 		if err != nil {
