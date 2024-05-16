@@ -472,7 +472,7 @@ func (moduleInfo *BRC20ModuleSwapInfo) GetUserTokenBalance(ticker, userPkScript 
 		usersTokens[uniqueLowerTicker] = tokenBalance
 	} else {
 		tokenBalance = tb
-		return tokenBalance
+		return tokenBalance // fixme: may missing tokenUsers
 	}
 
 	// set token's users
