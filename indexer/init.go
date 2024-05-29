@@ -196,7 +196,10 @@ func (g *BRC20ModuleIndexer) GetUserTokenBalance(ticker, userPkScript string) (t
 		tokenBalance = tb
 	}
 	// set token's users
-	tokenUsers := g.TokenUsersBalanceData[uniqueLowerTicker]
+	tokenUsers, ok := g.TokenUsersBalanceData[uniqueLowerTicker]
+	if !ok {
+		log.Panicf("g.TokenUsersBalanceData[%s], not exists", uniqueLowerTicker)
+	}
 	tokenUsers[userPkScript] = tokenBalance
 
 	return tokenBalance

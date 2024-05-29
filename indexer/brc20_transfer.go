@@ -256,7 +256,10 @@ func (g *BRC20ModuleIndexer) ProcessInscribeTransfer(data *model.InscriptionBRC2
 		tokenBalance = token
 	}
 	// set token's users
-	tokenUsers := g.TokenUsersBalanceData[uniqueLowerTicker]
+	tokenUsers, ok := g.TokenUsersBalanceData[uniqueLowerTicker]
+	if !ok {
+		log.Panicf("g.TokenUsersBalanceData[%s] not exist, tick: %s", uniqueLowerTicker, uniqueLowerTicker)
+	}
 	tokenUsers[string(data.PkScript)] = tokenBalance
 
 	body.BRC20Tick = tokenInfo.Ticker
