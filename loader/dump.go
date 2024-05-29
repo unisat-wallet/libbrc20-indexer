@@ -38,10 +38,9 @@ func DumpBRC20InputData(fname string, brc20Datas chan interface{}, hexBody bool)
 			}
 		}
 
-		fmt.Fprintf(file, "%t %s %d %d %d %d %s %d %s %s %d %d %d %d\n",
-			data.IsTransfer,
-
-			hex.EncodeToString([]byte(data.TxId)),
+		fmt.Fprintf(file, "%d %s %d %d %d %d %s %d %s %s %d %d %d\n",
+			data.Sequence,
+			utils.HashString([]byte(data.TxId)),
 			data.Idx,
 			data.Vout,
 			data.Offset,
@@ -53,7 +52,6 @@ func DumpBRC20InputData(fname string, brc20Datas chan interface{}, hexBody bool)
 			data.Height,
 			data.TxIdx,
 			data.BlockTime,
-			data.Sequence,
 		)
 	}
 }
