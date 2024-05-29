@@ -85,6 +85,10 @@ func NewBRC20History(historyType uint8, isValid bool, isTransfer bool,
 		history.OverallBalance = bal.AvailableBalance.Add(bal.TransferableBalance).String()
 		history.TransferableBalance = bal.TransferableBalance.String()
 		history.AvailableBalance = bal.AvailableBalance.String()
+	} else {
+		history.OverallBalance = "0"
+		history.TransferableBalance = "0"
+		history.AvailableBalance = "0"
 	}
 	return history
 }
