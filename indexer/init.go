@@ -64,9 +64,8 @@ type BRC20ModuleIndexer struct {
 	InscriptionsValidCommitMapById map[string]*model.InscriptionBRC20Data // inner valid commit by id
 
 	// runtime for withdraw
-	InscriptionsWithdrawRemoveMap  map[string]uint32                          // remove at height
-	InscriptionsValidWithdrawMap   map[string]*model.InscriptionBRC20SwapInfo // inner valid withdraw by key
-	InscriptionsInvalidWithdrawMap map[string]*model.InscriptionBRC20SwapInfo
+	InscriptionsWithdrawRemoveMap map[string]uint32                          // remove at height
+	InscriptionsWithdrawMap       map[string]*model.InscriptionBRC20SwapInfo // inner all withdraw by key
 
 	// for gen approve event
 	ThisTxId                                    string
