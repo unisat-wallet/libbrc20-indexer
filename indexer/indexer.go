@@ -67,8 +67,6 @@ func (g *BRC20ModuleIndexer) ProcessUpdateLatestBRC20Loop(brc20Datas, brc20Datas
 
 					if err := g.ProcessTransfer(data, transferInfo, isInvalid); err != nil {
 						log.Printf("process transfer move failed: %s", err)
-					} else {
-						g.Durty = true
 					}
 					break
 				}
@@ -80,8 +78,6 @@ func (g *BRC20ModuleIndexer) ProcessUpdateLatestBRC20Loop(brc20Datas, brc20Datas
 
 					if err := g.ProcessApprove(data, approveInfo, isInvalid); err != nil {
 						log.Printf("process approve move failed: %s", err)
-					} else {
-						g.Durty = true
 					}
 					break
 				}
@@ -94,7 +90,6 @@ func (g *BRC20ModuleIndexer) ProcessUpdateLatestBRC20Loop(brc20Datas, brc20Datas
 					if err := g.ProcessWithdraw(data, withdrawInfo); err != nil {
 						log.Printf("process withdraw move failed: %s", err)
 					} else {
-						g.Durty = true
 					}
 					break
 				}
@@ -106,8 +101,6 @@ func (g *BRC20ModuleIndexer) ProcessUpdateLatestBRC20Loop(brc20Datas, brc20Datas
 
 					if err := g.ProcessCommit(commitFrom, data, isInvalid); err != nil {
 						log.Printf("process commit move failed: %s", err)
-					} else {
-						g.Durty = true
 					}
 					break
 				}
