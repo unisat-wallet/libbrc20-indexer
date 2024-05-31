@@ -267,8 +267,8 @@ func DumpModuleTickInfoMap(file *os.File, condStateBalanceDataMap map[string]*mo
 			if len(balanceData.ValidApproveMap) > 0 {
 				fmt.Fprintf(file, ", nApprove: %d", len(balanceData.ValidApproveMap))
 			}
-			if len(balanceData.ValidWithdrawMap) > 0 {
-				fmt.Fprintf(file, ", nWithdraw: %d", len(balanceData.ValidWithdrawMap))
+			if len(balanceData.ReadyToWithdrawMap) > 0 {
+				fmt.Fprintf(file, ", nWithdraw: %d", len(balanceData.ReadyToWithdrawMap))
 			}
 			fmt.Fprintf(file, "\n")
 		}

@@ -623,10 +623,11 @@ type BRC20ModuleTokenBalance struct {
 	AvailableBalance       *decimal.Decimal
 	ApproveableBalance     *decimal.Decimal
 	CondApproveableBalance *decimal.Decimal
+	ReadyToWithdrawAmount  *decimal.Decimal
 
 	ValidConditionalApproveMap map[string]*InscriptionBRC20Data
 	ValidApproveMap            map[string]*InscriptionBRC20Data
-	ValidWithdrawMap           map[string]*InscriptionBRC20Data
+	ReadyToWithdrawMap         map[string]*InscriptionBRC20Data // ready to use, but inscription may invalid(depends on available b)
 
 	History []*BRC20ModuleHistory
 }
@@ -656,10 +657,11 @@ func (in *BRC20ModuleTokenBalance) DeepCopy() *BRC20ModuleTokenBalance {
 
 		ApproveableBalance:     decimal.NewDecimalCopy(in.ApproveableBalance),
 		CondApproveableBalance: decimal.NewDecimalCopy(in.CondApproveableBalance),
+		ReadyToWithdrawAmount:  decimal.NewDecimalCopy(in.ReadyToWithdrawAmount),
 
 		ValidConditionalApproveMap: make(map[string]*InscriptionBRC20Data, len(in.ValidConditionalApproveMap)),
 		ValidApproveMap:            make(map[string]*InscriptionBRC20Data, len(in.ValidApproveMap)),
-		ValidWithdrawMap:           make(map[string]*InscriptionBRC20Data, len(in.ValidWithdrawMap)),
+		ReadyToWithdrawMap:         make(map[string]*InscriptionBRC20Data, len(in.ReadyToWithdrawMap)),
 	}
 
 	for k, v := range in.ValidConditionalApproveMap {
@@ -670,9 +672,9 @@ func (in *BRC20ModuleTokenBalance) DeepCopy() *BRC20ModuleTokenBalance {
 		data := *v
 		tb.ValidApproveMap[k] = &data
 	}
-	for k, v := range in.ValidWithdrawMap {
+	for k, v := range in.ReadyToWithdrawMap {
 		data := *v
-		tb.ValidWithdrawMap[k] = &data
+		tb.ReadyToWithdrawMap[k] = &data
 	}
 
 	for _, h := range in.History {
@@ -699,6 +701,7 @@ func (in *BRC20ModuleTokenBalance) CherryPick() *BRC20ModuleTokenBalance {
 
 		ApproveableBalance:     decimal.NewDecimalCopy(in.ApproveableBalance),
 		CondApproveableBalance: decimal.NewDecimalCopy(in.CondApproveableBalance),
+		ReadyToWithdrawAmount:  decimal.NewDecimalCopy(in.ReadyToWithdrawAmount),
 	}
 	return tb
 }

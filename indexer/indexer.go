@@ -90,6 +90,7 @@ func (g *BRC20ModuleIndexer) ProcessUpdateLatestBRC20Loop(brc20Datas, brc20Datas
 					if err := g.ProcessWithdraw(data, withdrawInfo); err != nil {
 						log.Printf("process withdraw move failed: %s", err)
 					} else {
+						g.InscriptionsValidWithdrawMap[withdrawInfo.Data.GetInscriptionId()] = data.Height
 					}
 					break
 				}

@@ -65,7 +65,8 @@ type BRC20ModuleIndexer struct {
 
 	// runtime for withdraw
 	InscriptionsWithdrawRemoveMap map[string]uint32                          // remove at height
-	InscriptionsWithdrawMap       map[string]*model.InscriptionBRC20SwapInfo // inner all withdraw by key
+	InscriptionsWithdrawMap       map[string]*model.InscriptionBRC20SwapInfo // inner all ready to withdraw by key
+	InscriptionsValidWithdrawMap  map[string]uint32                          // valid withdraw by key(when send, can tell if valid)
 
 	// for gen approve event
 	ThisTxId                                    string
